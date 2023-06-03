@@ -1,0 +1,35 @@
+{
+  "name": "maptorium-ui",
+  "version": "0.9.7",
+  "description": "Maptorium UI - Frontend core for Maptorium project",
+  "main": "src/main.ts",
+  "scripts": {
+    "compile": "npx tsc",
+    "minify": "npx uglifyjs dist/maptorium.js -o dist/maptorium.min.js",
+    "bundle": "npx webpack",
+    "release": "npm run compile && npm run bundle && npm run minify",
+    "server": "npx http-server public -c-1 -p 3000",
+    "build": "npm run compile && npm run bundle"
+  },
+  "author": "Oleg Gunyakov",
+  "license": "GPL-3.0-only",
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.2",
+    "@types/jquery": "^3.5.16",
+    "assemblyscript": "^0.27.5",
+    "browserify": "^17.0.0",
+    "esmify": "^2.1.1",
+    "nodemon": "^2.0.22",
+    "ts-loader": "^9.4.2",
+    "typescript": "^5.0.4",
+    "uglify-js": "^3.17.4",
+    "webpack": "^5.83.1",
+    "webpack-cli": "^5.1.1"
+  },
+  "dependencies": {
+    "@assemblyscript/loader": "^0.27.5",
+    "@turf/helpers": "^6.5.0",
+    "@turf/turf": "^6.5.0",
+    "axios": "^1.4.0"
+  }
+}

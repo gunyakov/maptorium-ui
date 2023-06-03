@@ -1,0 +1,10 @@
+{
+    "200": {
+        "ru": "Some string",
+        "en": "Some string"
+    },
+    "300": {
+        "ru": "Some string",
+        "en": "Some string"
+    }
+}

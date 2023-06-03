@@ -1,0 +1,28 @@
+{
+  "extends": "@tsconfig/recommended/tsconfig.json",
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "module": "CommonJS",
+    "outDir": "build",
+    "rootDir": ".",
+    "resolveJsonModule": true,
+    "lib": [
+        "dom",
+        "es2017"
+    ],
+    "preserveConstEnums": true
+  },
+  "files": [
+    //"src/index.ts",
+    "src/main.ts"
+  ],
+  // "include": [
+  //   "src/**/*"
+  // ],
+  "exclude": [
+      "node_modules",
+      "**/*.spec.ts"
+  ]
+}
