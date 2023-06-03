@@ -15,8 +15,7 @@
   "license": "GPL-3.0-only",
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.2",
-    "@types/jquery": "^3.5.16",
-    "assemblyscript": "^0.27.5",
+    "@types/node": "^20.2.5",
     "browserify": "^17.0.0",
     "esmify": "^2.1.1",
     "nodemon": "^2.0.22",
@@ -27,7 +26,6 @@
     "webpack-cli": "^5.1.1"
   },
   "dependencies": {
-    "@assemblyscript/loader": "^0.27.5",
     "@turf/helpers": "^6.5.0",
     "@turf/turf": "^6.5.0",
     "axios": "^1.4.0"
