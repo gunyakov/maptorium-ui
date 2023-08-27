@@ -8,13 +8,21 @@ export default {
     subMenuTag: "ul",
     subMenuClass: "sub-menu",
     menuSelectedClass: "bg-secondary",
-    gpsRouteRecordButton: "gps-record-route",
-    gpsRouteNewButton: "gps-new-route",
-    gpsRouteTimeButton: "gps-sample-time",
-    gpsHistoryButton: "gps-history-list",
     toggleClass: "bg-secondary",
     mapContainerID: "mapMenuContainer",
     downloadMapList: "jobMap",
+    //---------------------------------------------------------------------------------------------------------------
+    //GPS
+    //---------------------------------------------------------------------------------------------------------------
+    gps: {
+        routeRecordButton: "gps-record-route",
+        routeNewButton: "gps-new-route",
+        routeTimeButton: "gps-sample-time",
+        historyButton: "gps-history-list",
+        sampleTimeBtn: "gps-sample-time",
+        startBtn: "gps-server-service"
+    },
+    
     //---------------------------------------------------------------------------------------------------------------
     //DRAWER PANEL
     //---------------------------------------------------------------------------------------------------------------

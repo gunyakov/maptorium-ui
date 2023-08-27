@@ -170,7 +170,7 @@ btnGPSInfo?.addEventListener("click", async() => {
     }
 });
 
-let sampleTimeBtn = document.getElementById("gps-sample-time");
+let sampleTimeBtn = document.getElementById(config.gps.sampleTimeBtn);
 sampleTimeBtn?.addEventListener("click", () => {
     //@ts-ignore
     alertify.prompt("Enter new sample rate of GPS position, in seconds.", "60", async (e, t) => {
@@ -188,3 +188,12 @@ distanceToGoBtn?.addEventListener("click", () => {
     }).set({title: "GPS Distance To Go"});
 });
 
+let startGPSBtn = document.getElementById(config.gps.startBtn) as HTMLButtonElement;
+startGPSBtn?.addEventListener("click", async(e) => {
+    if(startGPSBtn.classList.contains(config.toggleClass)) {
+        if(await jsonData.stopGPS()) startGPSBtn.classList.remove(config.toggleClass);
+    }
+    else {
+        if(await jsonData.startGPS()) startGPSBtn.classList.add(config.toggleClass);
+    }
+});

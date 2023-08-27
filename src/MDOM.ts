@@ -10,7 +10,7 @@ import config from "./config";
  
 let _recordRoute:boolean = false;
 
-let gpsRouteRecordButton = document.getElementById(config.gpsRouteRecordButton);
+let gpsRouteRecordButton = document.getElementById(config.gps.routeRecordButton);
 if(gpsRouteRecordButton) {
     gpsRouteRecordButton.addEventListener("mouseup", (ev:MouseEvent) => {
         if(_recordRoute) {

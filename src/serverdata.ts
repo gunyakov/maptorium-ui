@@ -24,10 +24,22 @@ export default {
         return await request("/gps/now", {}, "get");
     },
 
+    setGPSSampleTime: async function (time:number) {
+        return await request("/gps/sample", {time:time}, "post", true);
+    },
+
     getRoutePoint: async function():Promise<GPSCoords> {
         return await request("/gps/point", {}, "get");
     },
 
+    startGPS: async function():Promise<boolean> {
+        return await request("/gps/start", {}, "get", true);
+    },
+
+    stopGPS: async function():Promise<boolean> {
+        return await request("/gps/stop", {}, "get", true);
+    },
+    
     getRouteHistory: async function(routeID:number = 0):Promise<Array<GPSCoords>> {
         let alert = false;
         if(routeID > 0) alert = true;
@@ -82,10 +94,6 @@ export default {
 
     cleanCachedMap: async function():Promise<boolean> {
         return await request("/map/cached/clean", {}, "get", true);
-    },
-
-    setGPSSampleTime: async function (time:number) {
-        return await request("/gps/sample", {time:time}, "post", true);
     },
 
     getJobsList: async function () {
