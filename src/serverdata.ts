@@ -1,65 +1,121 @@
 import request from "./helpers/ajax";
-import { DefaultConfig, GPSCoords, MapList, PoiInfo, RouteList, ServerStat, ServerUpdates } from "./interfases";
+import { DefaultConfig, GPSCoords, GenJobInfo, JobInfo, MapList, PoiInfo, RouteList, ServerUpdates} from "./interfases";
+import { JobType } from "./enum";
 
-export default class ServerData {
+export default {
 
-    constructor() {
-
-    }
-
-    async getMapsList():Promise<MapList[]> {
+    getMapsList: async function():Promise<MapList[]> {
         return await request("/core/maps", {}, "get");
-    }
+    },
 
-    async getDefConfig():Promise<DefaultConfig> {
+    getDefConfig: async function():Promise<DefaultConfig> {
         return await request("/core/default", {}, "get");
-    }
+    },
 
-    async setDefConfig(config:{}):Promise<Boolean> {
-        await request("/core/default", config, "post");
-        return true;
-    }
+    setDefConfig: async function(config:{}, showNotification = true):Promise<Boolean> {
+        return await request("/core/default", config, "post", showNotification);
+    },
 
-    async getUpdates():Promise<ServerUpdates> {
+    getUpdates: async function():Promise<ServerUpdates> {
         return await request("/core/updates", {}, "get");
-    }
+    },
 
-    async getGPSCoords():Promise<GPSCoords> {
+    getGPSCoords: async function():Promise<GPSCoords> {
         return await request("/gps/now", {}, "get");
-    }
+    },
 
-    async getRoutePoint():Promise<GPSCoords> {
+    getRoutePoint: async function():Promise<GPSCoords> {
         return await request("/gps/point", {}, "get");
-    }
+    },
 
-    async getRouteHistory(routeID:number = 0):Promise<{id: number, points: Array<GPSCoords>}> {
+    getRouteHistory: async function(routeID:number = 0):Promise<Array<GPSCoords>> {
         let alert = false;
         if(routeID > 0) alert = true;
-        return await request("/gps/route", {routeID: routeID}, "post", alert);
-    }
+        return await request(`/gps/route/${routeID}`, {}, "get", alert);
+    },
 
-    async stopRecord():Promise<void> {
+    stopRecord: async function():Promise<void> {
         await request("/gps/stoprecord", {}, "get", true);
-    }
+    },
 
-    async startRecord():Promise<void> {
+    startRecord: async function():Promise<void> {
         await request("/gps/startrecord", {}, "get", true);
-    }
+    },
 
-    async startNewRoute(name:string):Promise<void> {
+    startNewRoute: async function(name:string):Promise<void> {
         await request("/gps/routenew", {name: name}, "post", true);
-    }
+    },
 
-    async setMode(mode:string):Promise<void> {
-        await request("/core/mode", {mode: mode}, "post", true);
-    }
-
-    async getRouteList():Promise<Array<RouteList>> {
+    getRouteList: async function():Promise<Array<RouteList>> {
         return await request("/gps/routelist", {}, "get");
-    }
+    },
 
-    async addPOI(POI:PoiInfo):Promise<{ID: number}> {
+    addPOI: async function(POI:PoiInfo):Promise<{ID: number}> {
         return await request("/poi/add", POI, "post", true);
-    }
+    },
 
+    getPOIList: async function():Promise<Array<PoiInfo>> {
+        return await request("/poi", {}, "get");
+    },
+
+    deletePOI: async function(ID:number):Promise<boolean> {
+        return await request("/poi/delete", {ID: ID}, "post", true);
+    },
+
+    updatePOI: async function(ID:number, type:string, points:Array<GPSCoords>):Promise<boolean> {
+        let result:Array<PoiInfo> = await request("/poi/update", {ID: ID, points: points, type: type}, "post", true);
+        if(result) return true;
+        else return false;
+    },
+
+    getCachedMapBBOX: async function(bbox:Array<number>, zoom:number, map:string):Promise<void> {
+        await request("/map/cached/bbox", {bbox:bbox, zoom: zoom, map: map}, "post", false);
+    },
+
+    getCachedMapPOI: async function(poiID:number, zoom:number, map:string):Promise<void> {
+        await request("/map/cached/poi", {poiID:poiID, zoom: zoom, map: map}, "post", false);
+    },
+
+    cancelCachedMapBuild: async function():Promise<boolean> {
+        return await request("/map/cached/cancel", {}, "get", true)
+    },
+
+    cleanCachedMap: async function():Promise<boolean> {
+        return await request("/map/cached/clean", {}, "get", true);
+    },
+
+    setGPSSampleTime: async function (time:number) {
+        return await request("/gps/sample", {time:time}, "post", true);
+    },
+
+    getJobsList: async function () {
+        return await request("/job/list", {}, "get") as Array<{ID:string, running:boolean, mapID:string, type: JobType}>;
+    },
+
+    jobAdd: async function(data:JobInfo) {
+        return await request("/job/download", data, "post", true) as boolean;
+    },
+
+    jobGenAdd: async function(data:GenJobInfo) {
+        return await request("/job/generate", data, "post", true) as boolean;
+    },
+
+    jobUp: async function(jobID:string):Promise<boolean> {
+        return await request(`/job/up/${jobID}`, {}, "get", true) as boolean;
+    },
+
+    jobDelete: async function(jobID:string):Promise<boolean> {
+        return await request(`/job/delete/${jobID}`, {}, "get", true) as boolean;
+    },
+
+    jobDown: async function(jobID:string):Promise<boolean> {
+        return await request(`/job/down/${jobID}`, {}, "get", true) as boolean;
+    },
+
+    jobStart: async function(jobID:string):Promise<boolean> {
+        return await request(`/job/start/${jobID}`, {}, "get", true) as boolean;
+    },
+    jobStop: async function(jobID:string):Promise<boolean> {
+        return await request(`/job/stop/${jobID}`, {}, "get", true) as boolean;
+    },
 }

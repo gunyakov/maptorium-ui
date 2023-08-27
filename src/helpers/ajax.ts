@@ -38,25 +38,27 @@ export default function request (url:string, data = {}, method:string = "post", 
             clearTimeout(timeOut);
             switch(data.result) {
                 case ResponseType.success:
-                    if(alert) {
+                    if(alert && data.message) {
                         Alerts.success(data.message);
                     }
-                    resolve(data.data);
+                    if(data.data) resolve(data.data);
+                    else resolve(true);
                     break;
                 case ResponseType.info:
-                    if(alert) {
+                    if(alert && data.message) {
                         Alerts.info(data.message);
                     }
-                    resolve(data.data);
+                    if(data.data) resolve(data.data);
+                    else resolve(true);
                     break;
                 case ResponseType.warning:
-                    if(alert) {
+                    if(alert && data.message) {
                         Alerts.warning(data.message);
                     }
                     resolve(false);
                     break;
                 case ResponseType.error:
-                    if(alert) {
+                    if(alert && data.message) {
                         Alerts.error(data.message);
                     }
                     resolve(false);

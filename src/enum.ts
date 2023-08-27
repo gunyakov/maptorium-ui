@@ -23,10 +23,70 @@ export enum EventType {
     routeStartRecord = "route.start",
     routeStopRecord = "route.stop",
     historyShow = "history.show",
-    historyHide = "history.hide"
+    historyHide = "history.hide",
+    historyPoint = "history.point",
+    addPolygon = "add.polygon",
+    addPolyline = "add.polyline",
+    addPoint = "add.point",
+    savePoi = "poi.save",
+    savePoiNew = "poi.savenew",
+    cachedTileMap = "cachedtile.map",
+    cachedTileMapClean = "cachedtile.clean",
+    cachedTileMapTile = "cachedtile.tile",
+    startPolyline = "start.polyline",
+    stopPolyline = "stop.polyline",
+    savePolyline = "save.polyline",
+    startPolygon = "start.polygon",
+    stopPolygon = "stop.polygon",
+    savePolygon = "save.polygon",
+    startSquare = "start.square",
+    stopSquare = "stop.square",
+    saveSquare = "save.square"
 }
 
 export enum MapFormat {
     raster = "raster",
     vector = "vector"
+}
+
+export enum POIType {
+    point = "point",
+    polygon = "polygon",
+    polyline = "polyline",
+    square = "square"
+}
+
+export enum LogType {
+    info = "info",
+    warning = "warning",
+    error = "error",
+    success = "success"
+}
+
+export enum LogModules {
+    main = "MAIN",
+    tstor = "TSTOR",
+    map = "MAP",
+    sqlite3 = "SQLITE3",
+    http = "HTTP",
+    gps = "GPS",
+    poi = "POI",
+    worker = "WORKER"
+}
+
+export enum DownloadMode {
+    enable = "enable",
+    disable = "disable",
+    force = "force"
+}
+
+export enum TileInCache {
+    missing = "missing",
+    present = "present",
+    empty = "empty"
+}
+
+export enum JobType {
+    download = "download",
+    generate = "generate"
 }

@@ -25,7 +25,7 @@ export default class Alerts {
 
     static info(message:string) {
         //@ts-ignore
-        alertify.info(message);
+        alertify.success(message);
     }
 
     static warning(message:string) {

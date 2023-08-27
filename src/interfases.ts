@@ -1,4 +1,4 @@
-import { MapFormat, MapType, ResponseType } from "./enum"
+import { MapFormat, MapType, POIType, ResponseType, DownloadMode, TileInCache } from "./enum"
 
 export interface MapList {
     id: string,
@@ -18,13 +18,18 @@ export interface ServerResponse {
 }
 
 export interface DefaultConfig {
+    map: string,
+    layers: Array<string>,
     lat: number,
     lng: number,
     zoom: number,
-    map: string,
-    layers: Array<string>,
-    showRoute: boolean,
-    recordRoute: boolean
+    showRoute?: boolean,
+    recordRoute?: boolean,
+    gpsSampleTime?: number,
+    mode?: DownloadMode,
+    jobManager?: boolean,
+    GPSInfoPanel?: boolean,
+    distanceToGo?: number;
 }
 
 export interface ServerUpdates {
@@ -38,7 +43,7 @@ export interface ServerUpdates {
 
 export interface GPSCoords {
     lat:number,
-    lon: number,
+    lng: number,
     dir: number
 }
 
@@ -59,9 +64,83 @@ export interface ServerStat {
 }
 
 export interface PoiInfo {
-    type: string,
-    points: Array<GPSCoords>
+    type: POIType,
+    name: string,
+    ID: number,
+    categoryID: number,
     color: string,
     fillColor: string,
-    opacity: number
+    fillOpacity: number,
+    width: number,
+    visible: number,
+    points: Array<GPSCoords>
+}
+
+export interface CategoryList {
+    ID:number,
+    name: string,
+    parentID: number,
+    order: number
+} 
+
+export interface JobInfo {
+    ID: string,
+    polygonID: number,
+    mapID: string,
+    randomDownload: boolean,
+    updateTiles: boolean,
+    updateDifferent: boolean,
+    updateDateTiles: boolean,
+    dateTiles: string,
+    emptyTiles: boolean,
+    checkEmptyTiles: boolean,
+    updateDateEmpty: boolean,
+    dateEmpty: string,
+    zoom: Array<number>
+}
+
+export interface GenJobInfo {
+    ID: string,
+    mapID:string,
+    polygonID: number,
+    zoom: Array<string>,
+    updateTiles: boolean,
+    completeTiles: boolean,
+    fromZoom: string
+    previousZoom: boolean
+}
+
+export interface JobStat {
+    download: number,
+    error: number,
+    empty: number,
+    size: number,
+    skip: number,
+    time: number,
+    total: number,
+    queue: number
+}
+
+export interface GenJobStat {
+    skip: number,
+    procesed: number,
+    total: number,
+    time: number,
+    readed: number,
+    size: number
+}
+
+export interface CachedTilesInfo {
+    map: string,
+    zoom: number,
+    tiles: {[id:number]:{[id:number]: TileInCache}}
+}
+
+export interface Statistic {
+    download: number,
+    error: number,
+    empty: number,
+    size: number,
+    skip: number,
+    queue: number
 }
