@@ -1,92 +1,105 @@
-export enum MapType {
-    map = "map",
-    layer = "layer"
+export enum eLanguageList {
+  ru = 'ru',
+  en = 'en'
+}
+
+export enum eMapType {
+  map = 'map',
+  layer = 'layer'
+}
+
+export enum eMapFormat {
+  rasted = 'rasted',
+  vector = 'vector'
 }
 
 export enum ResponseType {
-    success = "success",
-    info = "info",
-    warning = "warning",
-    error = "error"
+  success = 'success',
+  info = 'info',
+  warning = 'warning',
+  error = 'error'
 }
-
-export enum EventType {
-    init = "init",
-    mapCenter = "map.center",
-    mapChangeMap = "map.change",
-    mapAddLayer = "map.layerAdd",
-    mapRemoveLayer = "map.layerRemove",
-    gpsCoords = "gps.update",
-    routePoint = "route.point",
-    routeHide = "route.hide",
-    routeShow = "route.show",
-    routeStartRecord = "route.start",
-    routeStopRecord = "route.stop",
-    historyShow = "history.show",
-    historyHide = "history.hide",
-    historyPoint = "history.point",
-    addPolygon = "add.polygon",
-    addPolyline = "add.polyline",
-    addPoint = "add.point",
-    savePoi = "poi.save",
-    savePoiNew = "poi.savenew",
-    cachedTileMap = "cachedtile.map",
-    cachedTileMapClean = "cachedtile.clean",
-    cachedTileMapTile = "cachedtile.tile",
-    startPolyline = "start.polyline",
-    stopPolyline = "stop.polyline",
-    savePolyline = "save.polyline",
-    startPolygon = "start.polygon",
-    stopPolygon = "stop.polygon",
-    savePolygon = "save.polygon",
-    startSquare = "start.square",
-    stopSquare = "stop.square",
-    saveSquare = "save.square"
+//----------------------------------------------------------------------------------------------------------------------
+//List of GPS events
+//----------------------------------------------------------------------------------------------------------------------
+export enum GPSEvents {
+  update = 'update',
+  center = 'center'
 }
-
-export enum MapFormat {
-    raster = "raster",
-    vector = "vector"
+//----------------------------------------------------------------------------------------------------------------------
+//List of Routes events
+//----------------------------------------------------------------------------------------------------------------------
+export enum RoutesEvents {
+  route = 'route',
+  point = 'point',
+  hide = 'hide'
 }
-
+//----------------------------------------------------------------------------------------------------------------------
+//List of General API events
+//----------------------------------------------------------------------------------------------------------------------
+export enum APIEvents {
+  lang = 'lang',
+  mapChangeMap = 'map.change',
+  mapAddLayer = 'map.layerAdd',
+  mapRemoveLayer = 'map.layerRemove',
+  cacheMap = 'cache.map',
+  cacheTile = 'cache.tile'
+}
+export enum POIEvents {
+  polygon = 'polygon',
+  polyline = 'polyline',
+  point = 'point',
+  delete = 'delete',
+  update = 'update'
+}
+//----------------------------------------------------------------------------------------------------------------------
+//List of Network modes
+//----------------------------------------------------------------------------------------------------------------------
+export enum NetworkMode {
+  null = 'null',
+  enable = 'enable',
+  disable = 'disable',
+  force = 'force'
+}
+//List of distance Unit conveters
+export enum DistanceUnits {
+  kilometer = 1000,
+  nmile = 1852,
+  mile = 1609,
+  foot = 0.3048,
+  yard = 0.9144,
+  meter = 1
+}
 export enum POIType {
-    point = "point",
-    polygon = "polygon",
-    polyline = "polyline",
-    square = "square"
+  point = 'point',
+  polygon = 'polygon',
+  polyline = 'polyline',
+  square = 'square'
 }
-
-export enum LogType {
-    info = "info",
-    warning = "warning",
-    error = "error",
-    success = "success"
+export enum JobType {
+  download = 'download',
+  generate = 'generate'
 }
-
-export enum LogModules {
-    main = "MAIN",
-    tstor = "TSTOR",
-    map = "MAP",
-    sqlite3 = "SQLITE3",
-    http = "HTTP",
-    gps = "GPS",
-    poi = "POI",
-    worker = "WORKER"
-}
-
 export enum DownloadMode {
-    enable = "enable",
-    disable = "disable",
-    force = "force"
+  enable = 'enable',
+  disable = 'disable',
+  force = 'force'
+}
+
+export enum MAPEvents {
+  init = 'init',
+  POIRefresh = 'poi.refresh',
+  ctxMenuShow = 'cxtmenu.show',
+  ctxMenuHide = 'ctxmenu.hide'
+}
+
+export enum ManagerItemType {
+  folder = 'folder',
+  item = 'item'
 }
 
 export enum TileInCache {
-    missing = "missing",
-    present = "present",
-    empty = "empty"
-}
-
-export enum JobType {
-    download = "download",
-    generate = "generate"
+  missing = 'missing',
+  present = 'present',
+  empty = 'empty'
 }

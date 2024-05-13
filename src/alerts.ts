@@ -4,37 +4,57 @@
 //@ts-ignore
 
 export default class Alerts {
-
-    constructor() {
-        //@ts-ignore
-        this.options = {
-            timeOut: 5000,
-            progressBar: true,
-            showMethod: "slideDown",
-            hideMethod: "slideUp",
-            showDuration: 200,
-            hideDuration: 200,
-            positionClass: "toast-top-center"
-        };
+  constructor() {
+    //@ts-ignore
+    this.options = {
+      position: 'top-end',
+      icon: 'success',
+      showConfirmButton: !1,
+      timer: 1500
     }
+  }
 
-    static success(message:string) {
-        //@ts-ignore
-        alertify.success(message);
-    }
+  static success(message: string) {
+    //@ts-ignore
+    Swal.fire({
+      position: 'top-end',
+      icon: 'success',
+      title: message,
+      showConfirmButton: !1,
+      timer: 1500
+    })
+  }
 
-    static info(message:string) {
-        //@ts-ignore
-        alertify.success(message);
-    }
+  static info(message: string) {
+    //@ts-ignore
+    Swal.fire({
+      position: 'top-end',
+      icon: 'info',
+      title: message,
+      showConfirmButton: !1,
+      timer: 1500
+    })
+  }
 
-    static warning(message:string) {
-        //@ts-ignore
-        alertify.warning(message);
-    }
+  static warning(message: string) {
+    //@ts-ignore
+    Swal.fire({
+      position: 'top-end',
+      icon: 'warning',
+      title: message,
+      showConfirmButton: !1,
+      timer: 1500
+    })
+  }
 
-    static error(message:string) {
-        //@ts-ignore
-        alertify.error(message);
-    }
+  static error(message: string) {
+    //@ts-ignore
+    Swal.fire({
+      position: 'top-end',
+      icon: 'error',
+      title: message,
+      showConfirmButton: !1,
+      timer: 1500
+    })
+  }
 }

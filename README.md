@@ -1,54 +1,39 @@
-# maptorium-ui
+# Maptorium-UI
 
-Frontend part. All common JS code to use in UI interface. No JQuery or Leaflet dependency. Created to have ability in future to change map engine without rewriting core functions.
+Web UI for maptorium-server. For development purposese. If you looking 'ready for use' code without any installation and compilation, pls visit main repo release section for maptorium-server. Inside release section you will find archive with maptorium server and UI compiled for use. Windows version for one click run also available.
 
-### Data Interfaces
-##### Map List
-```
-    id: string,
-    type: MapType,
-    name: string,
-    tilesize: number,
-    attribution: string,
-    content: string,
-    format: MapFormat,
-    submenu: string
-```
-##### GPS Coords 
-```
-    lat: number,
-    lng: number,
-    dir: number
-```
-##### Polygon/Polyline Options
-```
-    name: string, 
-    color: string, 
-    fillColor: string, 
-    fillOpacity: number, 
-    width: number
-```
-### UI Events
+## Recommended IDE Setup
 
-UI events handled with .on function and callback.
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
 
-Example:
+## Type Support for `.vue` Imports in TS
 
+TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+
+## Customize configuration
+
+See [Vite Configuration Reference](https://vitejs.dev/config/).
+
+## Project Setup
+
+```sh
+npm install
 ```
-MUI.on("init", async function(mapsList, layersList) {
-    //Your code
-});
+
+### Compile and Hot-Reload for Development
+
+```sh
+npm run dev
 ```
-| Event | Params in callback | Description |
-|-|-|-|
-| init | mapsList: Array<[MapList](#map-list)>, layersList: Array<[MapList](#map-list)> | fired after init() function finish execution. |
-| map.center | lat: number, lng: number, zoom: number | fired when need to move map to specific point. Executed when default config get from server |
-| map.change | mapID: string, currentMapID: string | fired when user click on map menu to change main map. mapID - map what need to show. currentMapID - map what need to hide. |
-| map.layerAdd | layerID: string | fired when user click on layers menu to add one overlay to map |
-| map.layerRemove | layerID: string | fired when user click on layers menu to hide one layer from map |
-| gps.update | lat: number, lng: number, dir: number | fired when UI get new current GPS coords from server |
-| route.point | lat: number, lng: number | fired when server save new route point | 
-| route.hide | void | fired when user whant to hide route from map. No parameters. |
-| route.show | points: Array<[GPSCoords](#gps-coords)> | fired when user whant to show route on map. |
-| draw.polygon | points: Array<[GPSCoords](#gps-coords)>, ID: number, options: [PolygonOptions](#polygonpolyline-options) | fired to draw new polygon on map |
-| draw.polyline | points: Array<[GPSCoords](#gps-coords)>, ID: number, options: [PolylineOptions](#polygonpolyline-options) | fired to draw new polyline on map |
+
+### Type-Check, Compile and Minify for Production
+
+```sh
+npm run build
+```
+
+### Lint with [ESLint](https://eslint.org/)
+
+```sh
+npm run lint
+```
