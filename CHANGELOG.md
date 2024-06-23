@@ -1,5 +1,19 @@
 # maptorium-ui Changelog
 
+## 3.1.0 (2024-06-)
+
+### 🔧 Bugs
+
+- Fix ArcGIS style bug
+- Fix Base map menu background bug
+- Fix layers map menu background bug
+
+### 🔧 Workflow
+
+- Add additional styles for MapBOX and Maptorium maps
+- Add ability to input API key for MapBOX and Maptorium maps
+- Remove unnecessary dependencies from package.json
+
 ## 3.0.0 (2024-05-16) - Complet NEW UI for better expirience
 
 ### 🔧 Workflow

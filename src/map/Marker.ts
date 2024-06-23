@@ -48,7 +48,7 @@ class MAPTORIUMMARKER extends Geometry {
             //'icon-image': 'zoo',
             //'text-field': ['get', 'name'],
             'text-field': '{name}',
-            'text-font': ['KlokanTech Noto Sans Regular'],
+            'text-font': ['Noto Sans Regular'],
             'text-offset': [0, 1.25],
             'text-anchor': 'top',
             visibility: 'visible',

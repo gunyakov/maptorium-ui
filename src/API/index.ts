@@ -32,6 +32,7 @@ class MaptoriumAPI {
   private _rawMapsList: Ref<Array<SelectItem>> = ref([])
 
   private _baseMap: Ref<string> = ref('')
+  private _baseMapButton: Ref<number> = ref(0)
   private _layersList: Array<string> = []
 
   public mapLoaded: boolean = false
@@ -190,10 +191,17 @@ class MaptoriumAPI {
       this._callbacks[event](data1, data2, data3, data4)
     }
   }
-
-  public MapChange(mapID: string, style?: string) {
+  /**
+   * Change base map source or style.
+   * @param mapID - Map ID
+   * @param style - Map style
+   * @param buttonNumber - Optional. used to set proper background for buttons
+   */
+  public MapChange(mapID: string, style?: string, buttonNumber: number = 0) {
     if (this._callbacks[APIEvents.mapChangeMap]) {
       if (this._mapsList[mapID]) {
+        this._baseMap.value = mapID
+        this._baseMapButton.value = buttonNumber
         this._callbacks[APIEvents.mapChangeMap](this._mapsList[mapID], style)
         this.DefConfigSet({ map: mapID, style: style }, true)
       } else {
@@ -231,6 +239,10 @@ class MaptoriumAPI {
 
   public get baseMap() {
     return this._baseMap
+  }
+
+  public get baseMapButton() {
+    return this._baseMapButton.value
   }
 
   public get cachedBarInfo() {

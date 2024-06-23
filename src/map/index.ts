@@ -13,6 +13,7 @@ import { ConvertDEGToDMS } from '@/helpers/formaters'
 import type Geometry from './Geometry'
 import request from '@/API/ajax'
 import Marker from './Marker'
+import wait from '@/helpers/wait'
 
 class MaptoriumMap {
   private _map: maplibregl.Map | null = null
@@ -399,7 +400,7 @@ class MaptoriumMap {
   private async _getStyle(style?: string): Promise<boolean> {
     if (style != undefined && style != this._extendStyleID) {
       this._extendStyleID = style
-      const jsonStyle = (await request(`styles/${style}.json`)) as
+      const jsonStyle = (await request(`styles/${style}/style.json`)) as
         | maplibregl.StyleSpecification
         | false
       //If style from server
@@ -411,9 +412,10 @@ class MaptoriumMap {
     }
     return false
   }
-  private _updateMapStyle() {
+  private async _updateMapStyle() {
     if (this._map) {
       console.log('Update map style')
+
       let anyVectorMap = false
       //If style from server is
       const mainStyle = {
@@ -436,7 +438,7 @@ class MaptoriumMap {
         bearing: 0,
         pitch: 0,
         sources: {},
-        sprite: 'http://localhost/styles/sprite/sprite',
+        sprite: `http://localhost/styles/${this._extendStyleID}/sprite`,
         glyphs: 'styles/fonts/{fontstack}/{range}.pbf',
         layers: [
           {
@@ -444,8 +446,8 @@ class MaptoriumMap {
             type: 'background',
             paint: { 'background-color': '#f8f4f0' }
           }
-        ],
-        id: 'MAPTORIUM'
+        ]
+        //id: 'MAPTORIUM'
       }
       //If map is raster
       if (this._baseMap?.format == eMapFormat.rasted) {
@@ -467,16 +469,18 @@ class MaptoriumMap {
           }
         })
       }
+
       this._layersMap.forEach((item) => {
         if (item.format == eMapFormat.vector) {
           anyVectorMap = true
+
           mainStyle.sources['openmaptiles'] = {
             type: 'vector',
             tiles: [`tile/${item.id}/{z}/{x}/{y}`],
             minzoom: 0,
             maxzoom: 14,
             format: 'pbf',
-            pixel_scale: '256'
+            pixel_scale: '512'
           }
         }
         if (item.format == eMapFormat.rasted) {
@@ -503,7 +507,7 @@ class MaptoriumMap {
       if (this._baseMap?.format == eMapFormat.vector) {
         mainStyle.sources['openmaptiles'] = {
           type: 'vector',
-          tiles: [`tile/${this._baseMap.id}/{z}/{x}/{y}`],
+          tiles: [`tile/${this._baseMap.id}/{z}/{x}/{y}.pbf`],
           minzoom: 0,
           maxzoom: 14,
           format: 'pbf',
@@ -511,12 +515,19 @@ class MaptoriumMap {
         }
         anyVectorMap = true
       }
+
       if (this._extendStyle && anyVectorMap) {
         //Add extend style for vector tiles
-        this._extendStyle.layers.forEach((item) => {
+        for (let cL = 0; cL < this._extendStyle.layers.length; cL++) {
+          const item = this._extendStyle.layers[cL]
           mainStyle.layers.push(item)
-        })
+          //Set style for map
+          // this._map.setStyle(mainStyle)
+          // console.log(cL)
+          // await wait(200)
+        }
       }
+      //console.log(mainStyle)
       //Set style for map
       this._map.setStyle(mainStyle)
       //If need update, fire event to redraw POI

@@ -19,10 +19,6 @@ export default defineConfig({
         target: 'http://localhost:9009',
         changeOrigin: true
       },
-      '/socket.io': {
-        target: 'http://localhost:9009',
-        changeOrigin: true
-      },
       '/core': {
         target: 'http://localhost:9009',
         changeOrigin: true
@@ -35,6 +31,19 @@ export default defineConfig({
         target: 'http://localhost:9009',
         changeOrigin: true
       },
+
+      // '/tile/arcgisvector': {
+      //   target: 'http://localhost:9009',
+      //   // target:
+      //   //   'https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/tile/',
+      //   changeOrigin: true
+      //   // rewrite: (path) => path.replace('/tile/arcgisvector', '')
+      // },
+      '/tile/maptorium': {
+        target: 'http://localhost:9009/',
+        changeOrigin: true
+        //rewrite: (path) => path.replace('/tile/maptorium', '')
+      },
       '/tile': {
         target: 'http://localhost:9009',
         changeOrigin: true
@@ -42,6 +51,11 @@ export default defineConfig({
       '/map': {
         target: 'http://localhost:9009',
         changeOrigin: true
+      },
+      // Proxying websockets or socket.io: ws://localhost:5173/socket.io -> ws://localhost:5174/socket.io
+      '/socket.io': {
+        target: 'ws://localhost:9009',
+        ws: true
       }
     }
   }

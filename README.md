@@ -1,6 +1,8 @@
 # Maptorium-UI
 
-Web UI for maptorium-server. For development purposese. If you looking 'ready for use' code without any installation and compilation, pls visit main repo release section for maptorium-server. Inside release section you will find archive with maptorium server and UI compiled for use. Windows version for one click run also available.
+Web UI for maptorium-server. For development purposes on VUE 3.4
+
+If you looking `ready for use` code without any installation and compilation, pls visit main repo release section for maptorium-server. Inside release section you will find archive with maptorium server and UI compiled for use. Windows version for one click run also available.
 
 ## Recommended IDE Setup
 
