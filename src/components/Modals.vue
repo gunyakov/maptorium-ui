@@ -6,6 +6,7 @@ import FormPOIProperties from '@/components/forms/POIConfig.vue'
 import FormCachedMap from '@/components/forms/CachedMap.vue'
 import FormDTG from '@/components/forms/DistanceToGo.vue'
 import FormGPS from '@/components/forms/GPSConfig.vue'
+import FormGPSRouteFromFile from '@/components/forms/GPSRouteFromFile.vue'
 let formData: any = false
 </script>
 
@@ -57,6 +58,10 @@ let formData: any = false
             @update="(value) => (formData = value)"
             :defaults="Modals.defaults"
           ></FormGPS>
+          <FormGPSRouteFromFile
+            v-if="Modals.modalKey.value == ModalsList.GPSRouteFromFile"
+            @update="(value) => (formData = value)"
+          ></FormGPSRouteFromFile>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" @click="Modals.hide(false)">

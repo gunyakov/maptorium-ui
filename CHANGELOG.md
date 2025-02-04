@@ -1,6 +1,13 @@
 # maptorium-ui Changelog
 
-## 3.1.0 (2024-06-)
+## 3.2.0 (2025-02-10)
+
+### 🔧 Workflow
+
+- Update dependency
+- Implement JRC ECDIS CSV route reader
+
+## 3.1.0 (2024-06-15)
 
 ### 🔧 Bugs
 

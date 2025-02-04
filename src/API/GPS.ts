@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 //MAPTORIUM GPSCoords interface
 //----------------------------------------------------------------------------------------------------------------------
-import type { GPSCoords } from '@/interface'
+import type { GPSCoords, USBDevice } from '@/interface'
 //----------------------------------------------------------------------------------------------------------------------
 //List of GPS events
 //----------------------------------------------------------------------------------------------------------------------
@@ -31,6 +31,9 @@ import * as turf from '@turf/turf'
 //MAPTORIUM special formatters
 //----------------------------------------------------------------------------------------------------------------------
 import { secondsToHms } from '@/helpers/formaters'
+//----------------------------------------------------------------------------------------------------------------------
+//MAPTORIUM modals handler
+//----------------------------------------------------------------------------------------------------------------------
 import inputModalNew, { ModalsList } from '@/API/Modals'
 //----------------------------------------------------------------------------------------------------------------------
 //MAPTORIUM CLASS to handle GPS events and control GPS service on server
@@ -100,7 +103,7 @@ class MAPTORIUMGPS {
               turf.bearing(
                 [
                   this._speedLog[this._speedLog.length - 2].lat,
-                  this._speedLog[this._speedLog.length - 2]
+                  this._speedLog[this._speedLog.length - 2].lng
                 ],
                 [
                   this._speedLog[this._speedLog.length - 1].lat,
@@ -126,6 +129,47 @@ class MAPTORIUMGPS {
         this.leaveDistance.value = this._distanceToGo / this.units - this.distanceRun.value
         if (this.leaveDistance.value < 0) this.leaveDistance.value = 0
       }
+    }
+  }
+  /** Function to override geolocation in browser*/
+  overrideGeolocation(lat: number, lon: number, dir: number, speed: number) {
+    //Override standart geolocation function in browser
+    navigator.geolocation.getCurrentPosition = function (success) {
+      const position = {
+        coords: {
+          latitude: lat,
+          longitude: lon,
+          heading: dir,
+          altitude: 0,
+          accuracy: 10,
+          altitudeAccuracy: 10,
+          speed: speed,
+          toJSON: (): any => {}
+        },
+        timestamp: Date.now(),
+        toJSON: (): any => {}
+      }
+      success(position)
+    }
+
+    //Override standart position watch function in browser
+    //@ts-ignore
+    navigator.geolocation.watchPosition = function (success: PositionCallback) {
+      const position = {
+        coords: {
+          latitude: lat,
+          longitude: lon,
+          heading: dir,
+          altitude: 0,
+          accuracy: 10,
+          altitudeAccuracy: 10,
+          speed: speed,
+          toJSON: (): any => {}
+        },
+        timestamp: Date.now(),
+        toJSON: (): any => {}
+      }
+      success(position)
     }
   }
   /**
@@ -228,6 +272,8 @@ class MAPTORIUMGPS {
       | {
           host: string
           port: number
+          type: string
+          device: string
         }
     if (data && data.host && data.port) {
       await request('/core/default', { gpsServer: data }, 'post', true)
@@ -270,6 +316,10 @@ class MAPTORIUMGPS {
 
   public get lastCoords() {
     return this._lastCoords
+  }
+
+  public async deviceList() {
+    return (await request('/gps/list', {}, 'get')) as Array<USBDevice> | false
   }
 }
 //----------------------------------------------------------------------------------------------------------------------

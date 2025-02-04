@@ -132,5 +132,11 @@
   "TXT_KILOMETER": "Kilometer",
   "TXT_METER": "Meter",
   "BTN_CLEAN_LOG": "Clean all message",
-  "BTN_VISIT_WEBSITE": "View Website"
+  "BTN_VISIT_WEBSITE": "View Website",
+  "TXT_GPS_TYPE_SELECT": "Select GPS device type:",
+  "TXT_GPS_TCP": "GPS over TCP server.",
+  "TXT_GPS_USB": "USB/Serial GPS device.",
+  "TXT_GPS_USB_DEVICE": "Select device from the list:",
+  "BTN_GPS_ROUTE_FROM_FILE": "Read route from file...",
+  "TXT_GPS_ROUTE_FROM_FILE": "Route from file"
 }

@@ -5,7 +5,12 @@ import API from '@/API/index'
 import MenuBox from '@/components/menu/MenuItems/MenuBox.vue'
 import MenuItem from '@/components/menu/MenuItems/MenuItem.vue'
 import MenuItemSub from '@/components/menu/MenuItems/MenuItemSub.vue'
-
+//----------------------------------------------------------------------------------------------------------------------
+//MAPTORIUM modals handler
+//----------------------------------------------------------------------------------------------------------------------
+import inputModalNew, { ModalsList } from '@/API/Modals'
+import type { GPSCoords, POIInfo } from '@/interface'
+import { POIType } from '@/enum'
 async function toggleShow() {
   if (API.Routes.show.value) {
     if (await API.DefConfigSet({ showRoute: false })) API.Routes.Hide()
@@ -14,6 +19,47 @@ async function toggleShow() {
       API.Routes.show.value = true
       API.Routes.Points()
     }
+  }
+}
+/** Read data from route file and display on map */
+async function routeFromFileModal() {
+  const data = (await inputModalNew(ModalsList.GPSRouteFromFile)) as string | false
+  if (data) {
+    // Split the string by line endings
+    let lines = data.split(/\r?\n/) // This handles both \n and \r\n
+
+    // Read and process each line
+    lines = lines.filter((line) => !line.trim().startsWith('//'))
+    const arrCoords: GPSCoords[] = []
+    for (let i = 0; i < lines.length; i++) {
+      const coord = lines[i].split(',')
+      //Convert DMS to Decimal Degrees
+      //003,01,15.418,N,103,56.962,E,0.10,0.10,0.50,006.0,RL,11.46,0.50,08:00,W,EASTERN PEBGB
+      let lat = parseInt(coord[1]) + parseFloat(coord[2]) / 60
+
+      // Adjust for hemisphere
+      if (coord[3] == 'S') lat = -lat
+
+      let name = coord[16]
+      let lng = parseInt(coord[4]) + parseFloat(coord[5]) / 60
+      if (coord[6] == 'W') lng = -lng
+      if (lat && lng) {
+        arrCoords.push({ lat, lng })
+      }
+    }
+    const poiInfo: POIInfo = {
+      type: POIType.polyline,
+      points: arrCoords,
+      categoryID: 0,
+      ID: 0,
+      name: 'GPS Planned Route',
+      color: '#666666',
+      width: 2,
+      fillColor: '0',
+      fillOpacity: 0,
+      visible: 1
+    }
+    API.POI.Add(poiInfo)
   }
 }
 </script>
@@ -46,6 +92,7 @@ async function toggleShow() {
           <MenuItem @click="API.GPS.distanceToGoModal()">
             {{ Lang.BTN_GSP_DISTANCE_GO }}...
           </MenuItem>
+          <MenuItem @click="routeFromFileModal"> {{ Lang.BTN_GPS_ROUTE_FROM_FILE }}... </MenuItem>
         </template>
       </MenuItemSub>
       <!--GPS HISTORY-->

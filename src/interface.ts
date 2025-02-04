@@ -202,3 +202,9 @@ export interface CachedTilesInfo {
   zoom: number
   tiles: { [id: number]: { [id: number]: TileInCache } }
 }
+
+export interface USBDevice {
+  path: string
+  manufacturer: string
+  friendlyName?: string
+}

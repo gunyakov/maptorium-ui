@@ -132,5 +132,11 @@
   "TXT_KILOMETER": "Километр",
   "TXT_METER": "Метр",
   "BTN_CLEAN_LOG": "Очистить все сообщения",
-  "BTN_VISIT_WEBSITE": "Посетить сайт"
+  "BTN_VISIT_WEBSITE": "Посетить сайт",
+  "TXT_GPS_TYPE_SELECT": "Выберите тип устройства GPS:",
+  "TXT_GPS_TCP": "GPS от TCP сервера.",
+  "TXT_GPS_USB": "USB/Serial GPS устройство.",
+  "TXT_GPS_USB_DEVICE": "Выберите устройство из списка:",
+  "BTN_GPS_ROUTE_FROM_FILE": "Прочитать маршрут из файла...",
+  "TXT_GPS_ROUTE_FROM_FILE": "Маршрут из файла"
 }

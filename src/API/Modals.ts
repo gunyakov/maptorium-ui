@@ -6,7 +6,8 @@ export enum ModalsList {
   CategoryConfig = 'CategoryConfig',
   CachedMap = 'CachedMap',
   DistanceToGO = 'DistanceToGo',
-  GPSConfig = 'GPSConfig'
+  GPSConfig = 'GPSConfig',
+  GPSRouteFromFile = 'GPSRouteFromFile'
 }
 class MAPTORIUMMODALS {
   private _callback: CallableFunction | null = null
@@ -31,6 +32,8 @@ class MAPTORIUMMODALS {
     if (modalName == ModalsList.DistanceToGO)
       this._modalTitle.value = Lang.value.TXT_GPS_DISTANCE_GO
     if (modalName == ModalsList.GPSConfig) this._modalTitle.value = Lang.value.TXT_GPS_MODAL_TITLE
+    if (modalName == ModalsList.GPSRouteFromFile)
+      this._modalTitle.value = Lang.value.TXT_GPS_ROUTE_FROM_FILE
     await nextTick()
     if (defaults) this._defaults.value = defaults
     await nextTick()

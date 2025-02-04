@@ -16,19 +16,19 @@ export default defineConfig({
   server: {
     proxy: {
       '/gps': {
-        target: 'http://localhost:9009',
+        target: 'http://127.0.0.1:9009',
         changeOrigin: true
       },
       '/core': {
-        target: 'http://localhost:9009',
+        target: 'http://127.0.0.1:9009',
         changeOrigin: true
       },
       '/poi': {
-        target: 'http://localhost:9009',
+        target: 'http://127.0.0.1:9009',
         changeOrigin: true
       },
       '/job': {
-        target: 'http://localhost:9009',
+        target: 'http://127.0.0.1:9009',
         changeOrigin: true
       },
 
@@ -39,22 +39,22 @@ export default defineConfig({
       //   changeOrigin: true
       //   // rewrite: (path) => path.replace('/tile/arcgisvector', '')
       // },
-      '/tile/maptorium': {
-        target: 'http://localhost:9009/',
-        changeOrigin: true
-        //rewrite: (path) => path.replace('/tile/maptorium', '')
-      },
+      // '/tile/maptorium': {
+      //   target: 'http://localhost:9010/',
+      //   changeOrigin: true,
+      //   rewrite: (path) => path.replace('/tile/maptorium', '')
+      // },
       '/tile': {
-        target: 'http://localhost:9009',
+        target: 'http://127.0.0.1:9009',
         changeOrigin: true
       },
       '/map': {
-        target: 'http://localhost:9009',
+        target: 'http://127.0.0.1:9009',
         changeOrigin: true
       },
       // Proxying websockets or socket.io: ws://localhost:5173/socket.io -> ws://localhost:5174/socket.io
       '/socket.io': {
-        target: 'ws://localhost:9009',
+        target: 'ws://127.0.0.1:9009',
         ws: true
       }
     }
