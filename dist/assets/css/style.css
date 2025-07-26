@@ -15934,3 +15934,9 @@ a.ck.ck-button:focus {
     width: 100%;
   }
 }
+
+.fix-position {
+  position: fixed;
+  top: 70px;
+  left: 70px;
+}

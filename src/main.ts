@@ -22,7 +22,7 @@ import App from './App.vue'
 
 const app = createApp(App)
 
-app.use(createPinia())
+//app.use(createPinia())
 //pp.use(router)
 
 app.mount('#app')

@@ -1,6 +1,6 @@
 # maptorium-ui Changelog
 
-## 3.2.0 (2025-02-4)
+## 3.2.0 (2025-07-26)
 
 ### 🔧 Workflow
 

@@ -655,12 +655,14 @@
           $('body').has('.main-sidebar').find('.header').addClass('expanded')
           $('.header .logo').addClass('small')
           $('.main-sidebar').addClass('collapsed')
+          $('.main-content').addClass('fix-position')
           $('.body-padding').addClass('expanded', 300)
           $('.sidebar-link-group').show()
         } else {
           $('body').has('.main-sidebar').find('.header').addClass('has-sidebar')
           $('.main-sidebar').removeClass('sidebar-mini')
           $('.main-sidebar').removeClass('collapsed')
+          $('.main-content').removeClass('fix-position')
         }
         if ($('.sidebar-menu').overlayScrollbars({})) {
           $('.sidebar-menu').overlayScrollbars().destroy()
@@ -721,6 +723,7 @@
           $('.header .logo').removeClass('small')
           $('.main-sidebar').removeClass('collapsed sidebar-hover hoverable')
           $('.body-padding').removeClass('expanded hover-menu')
+          $('.main-content').removeClass('fix-position')
           $('.sidebar-link-group').show()
         } else {
           $('body').has('.main-sidebar').find('.header').removeClass('has-sidebar')
@@ -907,12 +910,14 @@
           $('.header .logo').toggleClass('small')
           if (!$('.main-sidebar').hasClass('two-column-menu')) {
             $('.main-sidebar').toggleClass('collapsed')
+            $('.main-content').toggleClass('fix-position')
           }
           $('.body-padding').toggleClass('expanded')
           $('.sidebar-link-group').show()
         } else {
           $('.main-sidebar').toggleClass('sidebar-mini')
           $('.main-sidebar').removeClass('collapsed')
+          $('.main-content').removeClass('fix-position')
         }
         if ($('.main-sidebar').hasClass('collapsed')) {
           $('.sidebar-menu').overlayScrollbars().destroy()
@@ -923,6 +928,7 @@
           $('.sidebar-menu').overlayScrollbars({})
           $('.main-sidebar').toggleClass('sub-menu-collapsed').addClass('collapsed')
           $('body').addClass('has-fixed-sidebar')
+          $('.main-content').addClass('fix-position')
         }
       })
       $(document).on('click', function (e) {

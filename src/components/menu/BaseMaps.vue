@@ -41,6 +41,22 @@ import MenuItemSub from '@/components/menu/MenuItems/MenuItemSub.vue'
           >
         </template>
       </MenuItemSub>
+      <!--Marine Maps-->
+      <MenuItemSub icon="mdi mdi-home-map-marker" id="marineMap">
+        Marine
+        <template #items>
+          <MenuItem
+            @click="API.MapChange('garminmarine', undefined, 26)"
+            :background="API.baseMapButton == 26"
+            >Garmin Marine</MenuItem
+          >
+          <MenuItem
+            @click="API.MapChange('navionics', undefined, 27)"
+            :background="API.baseMapButton == 27"
+            >Navoinic</MenuItem
+          >
+        </template>
+      </MenuItemSub>
       <MenuItem
         @click="API.MapChange('osm', '', 16)"
         icon="far fa-map"

@@ -1,4 +1,4 @@
-import maplibregl from 'maplibre-gl'
+import maplibregl, { type FlyToOptions } from 'maplibre-gl'
 
 import API from '@/API/index'
 import { POIType, eMapFormat, MAPEvents } from '@/enum'
@@ -14,7 +14,62 @@ import type Geometry from './Geometry'
 import request from '@/API/ajax'
 import Marker from './Marker'
 import wait from '@/helpers/wait'
-
+/**
+ * Custom Button to center map to GPS
+ * */
+const gpsPosition: FlyToOptions = {
+  center: [144, -37]
+}
+class GPSToCenterButton {
+  private container: HTMLDivElement | undefined = undefined
+  private map: maplibregl.Map | undefined = undefined
+  onAdd(map: maplibregl.Map) {
+    const div = document.createElement('div')
+    div.className = 'maplibregl-ctrl maplibregl-ctrl-group'
+    div.innerHTML = `<button class='maplibregl-ctrl-geolocate maplibregl-ctrl-geolocate-active'>
+    <span class="maplibregl-ctrl-icon" aria-hidden="true"></span> </button>`
+    div.addEventListener('contextmenu', (e) => e.preventDefault())
+    div.addEventListener('click', () => map.flyTo(gpsPosition))
+    this.container = div
+    this.map = map
+    return div
+  }
+  onRemove() {
+    if (this.container) this.container.parentNode?.removeChild(this.container)
+    if (this.map) this.map = undefined
+  }
+}
+/**
+ * Custom Button to Hide water polygon
+ */
+let hideWater = false
+class HideWaterButton {
+  private container: HTMLDivElement | undefined = undefined
+  private map: maplibregl.Map | undefined = undefined
+  onAdd(map: maplibregl.Map) {
+    const div = document.createElement('div')
+    div.className = 'maplibregl-ctrl maplibregl-ctrl-group'
+    div.innerHTML = `<button>
+    <svg class="svg-icon" style="vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M853.31968 526.37696c-12.288-122.01984-63.8976-213.68832-126.03392-213.68832-25.47712 0-49.152 15.48288-69.2224 42.10688C624.55808 281.51808 581.632 237.568 534.7328 237.568s-90.112 44.31872-123.65824 118.00576c-20.0704-27.0336-43.99104-42.76224-69.632-42.76224-62.0544 0-113.90976 91.70944-125.952 213.68832zM722.90304 677.92896a121.11872 121.11872 0 0 0-44.07296 26.624 70.08256 70.08256 0 0 1-23.10144 13.68064c-16.7936 5.5296-31.49824 1.26976-46.44864-13.68064-29.20448-29.20448-65.3312-38.62528-101.66272-26.46016a122.0608 122.0608 0 0 0-44.31872 26.70592l-0.57344 0.57344s-15.19616 14.78656-33.5872 15.27808c-11.75552 0.32768-23.26528-5.12-35.18464-16.384-30.14656-28.672-66.7648-38.13376-103.0144-26.2144a102.89152 102.89152 0 0 0-21.2992 9.216 322.43712 322.43712 0 0 0 34.97984 42.5984 37.15072 37.15072 0 0 1 4.096-1.4336c17.03936-5.03808 32.23552-0.49152 47.84128 14.45888 21.83168 20.80768 45.75232 31.41632 71.35232 31.41632h2.2528c38.78912-0.94208 65.536-26.29632 70.69696-31.41632a71.18848 71.18848 0 0 1 24.576-14.25408c16.384-5.03808 30.88384-0.57344 45.42464 13.9264 29.20448 29.20448 65.24928 38.62528 101.33504 26.624a120.91392 120.91392 0 0 0 43.90912-26.46016 67.82976 67.82976 0 0 1 24.576-14.17216 38.37952 38.37952 0 0 1 24.28928 0 322.39616 322.39616 0 0 0 34.816-42.76224 92.20096 92.20096 0 0 0-76.88192-7.86432zM818.62656 591.29856c-29.20448-29.20448-65.24928-38.62528-101.33504-26.624a121.11872 121.11872 0 0 0-44.07296 26.624 68.97664 68.97664 0 0 1-23.10144 13.68064c-16.7936 5.5296-31.49824 1.26976-46.44864-13.68064-29.20448-29.20448-65.3312-38.62528-101.66272-26.46016a122.0608 122.0608 0 0 0-44.31872 26.70592l-0.49152 0.49152a60.86656 60.86656 0 0 1-22.9376 13.5168c-9.99424 3.03104-25.6 4.79232-45.99808-14.70464-30.3104-28.672-66.92864-38.13376-103.17824-26.29632a121.11872 121.11872 0 0 0-44.56448 26.624l-0.73728 0.73728a65.536 65.536 0 0 1-12.00128 8.76544 318.75072 318.75072 0 0 0 20.48 49.9712 112.64 112.64 0 0 0 30.06464-21.21728 70.90176 70.90176 0 0 1 23.42912-13.76256 40.96 40.96 0 0 1 17.98144-2.17088c10.73152 0.94208 20.97152 6.30784 31.49824 16.384 21.83168 20.80768 45.75232 31.41632 71.35232 31.41632h2.2528c39.03488-0.94208 65.98656-26.624 70.77888-31.49824a70.90176 70.90176 0 0 1 23.42912-13.76256c16.95744-5.61152 31.82592-1.35168 46.77632 13.5168 29.20448 29.20448 65.24928 38.62528 101.33504 26.624a121.11872 121.11872 0 0 0 44.07296-26.624 67.9936 67.9936 0 0 1 23.10144-13.59872c16.7936-5.5296 31.49824-1.26976 46.44864 13.68064a111.45216 111.45216 0 0 0 38.13376 25.51808 318.95552 318.95552 0 0 0 20.76672-49.93024 55.296 55.296 0 0 1-21.05344-13.9264z"  /></svg> 
+    </button>`
+    div.addEventListener('contextmenu', (e) => e.preventDefault())
+    div.addEventListener('click', () => {
+      map.setLayoutProperty('water', 'visibility', 'none')
+      map.setLayoutProperty('water-offset', 'visibility', 'none')
+      hideWater = true
+    })
+    this.container = div
+    this.map = map
+    return div
+  }
+  onRemove() {
+    if (this.container) this.container.parentNode?.removeChild(this.container)
+    if (this.map) this.map = undefined
+  }
+}
+/**
+ * Main Maptorium class to control maplibre-gl
+ */
 class MaptoriumMap {
   private _map: maplibregl.Map | null = null
   private _GPSMarker: Point | null = null
@@ -204,6 +259,26 @@ class MaptoriumMap {
       this._fire(MAPEvents.ctxMenuHide)
     })
 
+    map.addControl(
+      new maplibregl.NavigationControl({
+        visualizePitch: true,
+        showZoom: true,
+        showCompass: true
+      }),
+      'top-left'
+    )
+
+    map.addControl(new maplibregl.GlobeControl(), 'top-left')
+
+    //Add custom button to center my by GPS
+    const myGPSControl = new GPSToCenterButton()
+    map.addControl(myGPSControl, 'top-left')
+
+    //Add custom button to show/hide water polygone
+    const myWaterControl = new HideWaterButton()
+    map.addControl(myWaterControl, 'top-left')
+
+    //Handle context menu for map
     map.on('contextmenu', (e) => {
       const features = map.queryRenderedFeatures(e.point)
       let mID = 0
@@ -238,6 +313,7 @@ class MaptoriumMap {
    * @param dir - Direction to rotate marker
    */
   public GPSMarker(lat: number, lng: number, dir?: number) {
+    gpsPosition.center = [lng, lat]
     //if (!this._GPSMarker && this.map) this._GPSMarker = new Marker(this.map, 'GPSMarker')
     if (!this._GPSMarker && this.map) {
       this._GPSMarker = new Point(this.map, 'GPSMarker')
@@ -446,7 +522,10 @@ class MaptoriumMap {
             type: 'background',
             paint: { 'background-color': '#f8f4f0' }
           }
-        ]
+        ],
+        sky: {
+          'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0]
+        }
         //id: 'MAPTORIUM'
       }
       //If map is raster
@@ -527,6 +606,11 @@ class MaptoriumMap {
           // await wait(200)
         }
       }
+      mainStyle.layers.forEach((value, index) => {
+        if (value['source-layer'] == 'water' && hideWater == true) {
+          mainStyle.layers[index].layout.visibility = 'none'
+        }
+      })
       //console.log(mainStyle)
       //Set style for map
       this._map.setStyle(mainStyle)
