@@ -1,91 +1,126 @@
-import { ResponseType } from '../enum'
-//------------------------------------------------------------------------------
+import { ResponseType } from 'src/enum';
+//--------------------------------------------------------------------------
 //Axios
-//------------------------------------------------------------------------------
-import axios from 'axios'
+//--------------------------------------------------------------------------
+import axios from 'axios';
+//--------------------------------------------------------------------------
+//Import stores and composables
+//--------------------------------------------------------------------------
+import { useSettingsStore } from 'src/stores/settings';
+//--------------------------------------------------------------------------
+//Import Alerts help class to rise quasar alers and notify.
+//--------------------------------------------------------------------------
+import Alerts from 'src/alerts';
+//--------------------------------------------------------------------------
+// Import the i18n instance you created with createI18n()
+//--------------------------------------------------------------------------
+import { t } from 'src/i18n';
 
-import Alerts from '@/alerts'
+const urlList = {
+  'core.maps': '/core/maps',
+  'core.default': '/core/default',
+  'core.mode': '/core/mode',
+  'gps.now': '/gps/now',
+  'gps.start': '/gps/start',
+  'gps.stop': '/gps/stop',
+  'gps.startrecord': '/gps/startrecord',
+  'gps.stoprecord': '/gps/stoprecord',
+  'gps.sample': '/gps/sample',
+  'gps.routelist': '/gps/routelist',
+  'gps.routenew': '/gps/routenew',
+  'gps.route': '/gps/route',
+  'gps.list': '/gps/list',
+  'poi:full_list': '/poi',
+};
 
-import Lang from '@/lang/index'
+type UrlKey = keyof typeof urlList;
 
-export default function request(
+function joinBaseWithPath(path: string): string {
+  const settings = useSettingsStore();
+  const baseUrl = settings.getBaseURL().replace(/\/+$/, '');
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${baseUrl}${normalizedPath}`;
+}
+
+function executeRequest<T = unknown>(
   url: string,
   data = {},
-  method: string = 'post',
-  alert: boolean = false
-): boolean | any {
-  return new Promise((resolve, reject) => {
+  method: string = 'get',
+  alert: boolean = false,
+): Promise<T | boolean> {
+  return new Promise((resolve) => {
     function resetTimeout() {
-      const msg = Lang.value.TXT_REQUEST_TIMEOUT
-      if (alert) Alerts.error(msg.replace('$', url))
-      resolve(false)
+      const msg = t('request.timeout');
+      if (alert) Alerts.error(msg.replace('$', url));
+      resolve(false);
     }
-    const timeOut = setTimeout(resetTimeout, 10000)
+    const timeOut = setTimeout(resetTimeout, 10000);
 
-    //Generate axios config
     const axiosConfig = {
       method: method,
       url: url,
       timeout: 3000,
       responseType: 'json',
       decompress: false,
-      //withCredentials: true,
       data: data,
       headers: {
-        // Overwrite Axios's automatically set Content-Type
-        'Content-Type': 'application/json'
-      }
-    }
+        'Content-Type': 'application/json',
+      },
+    };
 
-    //Try to get urls
-    //@ts-ignore
+    //@ts-expect-error error in declaration only
     axios(axiosConfig)
       .then(function (response) {
-        const data = response.data
-        clearTimeout(timeOut)
+        const data = response.data;
+        clearTimeout(timeOut);
         switch (data.result) {
           case ResponseType.success:
-            if (alert && data.message) {
-              Alerts.success(data.message)
-            }
-            if (data.data) resolve(data.data)
-            else resolve(true)
-            break
+            if (alert && data.message) Alerts.success(data.message);
+            if (data.data) resolve(data.data as T);
+            else resolve(true);
+            break;
           case ResponseType.info:
-            if (alert && data.message) {
-              Alerts.info(data.message)
-            }
-            if (data.data) resolve(data.data)
-            else resolve(true)
-            break
+            if (alert && data.message) Alerts.info(data.message);
+            if (data.data) resolve(data.data as T);
+            else resolve(true);
+            break;
           case ResponseType.warning:
-            if (alert && data.message) {
-              Alerts.warning(data.message)
-            }
-            resolve(false)
-            break
+            if (alert && data.message) Alerts.warning(data.message);
+            resolve(false);
+            break;
           case ResponseType.error:
-            if (alert && data.message) {
-              Alerts.error(data.message)
-            }
-            resolve(false)
-            break
+            if (alert && data.message) Alerts.error(data.message);
+            resolve(false);
+            break;
           default:
-            if (response.status == 200) {
-              resolve(response.data)
-            } else {
-              console.log('Results state is unspecified.')
-              console.log(response)
-              resolve(false)
-            }
+            if (response.status == 200) resolve(response.data as T);
+            else resolve(false);
         }
-        //@ts-ignore
       })
-      .catch(async function (error) {
-        if (alert) {
-          Alerts.error(error.message)
-        }
-        resolve(false)
-      })
-  })
+      .catch((error) => {
+        if (alert) Alerts.error(error.message);
+        resolve(false);
+      });
+  });
+}
+
+export default function request<T = unknown>(
+  urlKey: UrlKey,
+  data = {},
+  method: string = 'get',
+  alert: boolean = false,
+): Promise<T | boolean> {
+  const url = joinBaseWithPath(urlList[urlKey]);
+  return executeRequest<T>(url, data, method, alert);
+}
+
+export function requestPath<T = unknown>(
+  path: string,
+  data = {},
+  method: string = 'get',
+  alert: boolean = false,
+): Promise<T | boolean> {
+  //const url = joinBaseWithPath(path);
+  const url = path;
+  return executeRequest<T>(url, data, method, alert);
 }

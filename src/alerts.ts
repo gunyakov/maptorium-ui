@@ -1,60 +1,62 @@
 //---------------------------------------------
 //Wrapper for any alerts/popup windows
 //---------------------------------------------
-//@ts-ignore
+import { Notify, Loading, Dialog, QSpinnerClock, QSpinnerTail } from 'quasar';
+import { t } from 'src/i18n';
 
 export default class Alerts {
-  constructor() {
-    //@ts-ignore
-    this.options = {
-      position: 'top-end',
-      icon: 'success',
-      showConfirmButton: !1,
-      timer: 1500
-    }
+  static _toast(
+    message: string,
+    type: 'positive' | 'negative' | 'warning' | 'info' | 'ongoing' = 'info',
+  ) {
+    Notify.create({
+      message,
+      type, // uses Quasar built-in colors (green, red, orange, blue, gray)
+      timeout: 2500, // 2.5 seconds → auto-close
+      actions: [], // no buttons at all
+      position: 'bottom-right', // classic toast position (you can change to 'top', 'bottom', etc.)
+      html: true, // if you need HTML inside the message
+    });
   }
+  constructor() {}
 
   static success(message: string) {
-    //@ts-ignore
-    Swal.fire({
-      position: 'top-end',
-      icon: 'success',
-      title: message,
-      showConfirmButton: !1,
-      timer: 1500
-    })
+    this._toast(t(message), 'positive');
   }
 
   static info(message: string) {
-    //@ts-ignore
-    Swal.fire({
-      position: 'top-end',
-      icon: 'info',
-      title: message,
-      showConfirmButton: !1,
-      timer: 1500
-    })
+    this._toast(t(message), 'info');
   }
 
   static warning(message: string) {
-    //@ts-ignore
-    Swal.fire({
-      position: 'top-end',
-      icon: 'warning',
-      title: message,
-      showConfirmButton: !1,
-      timer: 1500
-    })
+    this._toast(t(message), 'warning');
   }
 
   static error(message: string) {
-    //@ts-ignore
-    Swal.fire({
-      position: 'top-end',
-      icon: 'error',
-      title: message,
-      showConfirmButton: !1,
-      timer: 1500
-    })
+    this._toast(t(message), 'negative');
+  }
+
+  static showLoading(message: string, spinnerClock: boolean = false) {
+    Loading.show({
+      message: t(message),
+      boxClass: 'bg-grey-2 text-grey-9 text-bold',
+      spinnerColor: 'teal-8',
+      spinner: spinnerClock ? QSpinnerClock : QSpinnerTail,
+    });
+  }
+
+  static hideLoading() {
+    Loading.hide();
+  }
+
+  static showDialog(title: string, message: string) {
+    Dialog.create({
+      title: t(title),
+      message: t(message),
+      ok: {
+        label: t('TXT_CLOSE'),
+        color: 'primary',
+      },
+    });
   }
 }

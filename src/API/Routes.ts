@@ -1,66 +1,69 @@
 //----------------------------------------------------------------------------------------------------------------------
 //MAPTORIUM interfaces
 //----------------------------------------------------------------------------------------------------------------------
-import type { RouteList, GPSCoords } from '@/interface'
+import type { RouteList, GPSCoords } from 'src/interface';
 //----------------------------------------------------------------------------------------------------------------------
 //List of Routes events
 //----------------------------------------------------------------------------------------------------------------------
-import { RoutesEvents } from '@/enum'
+import { RoutesEvents } from 'src/enum';
 //----------------------------------------------------------------------------------------------------------------------
 //MAPTORIUM CLASS to get data from Server
 //----------------------------------------------------------------------------------------------------------------------
-import request from './ajax'
+import request from 'src/API/ajax';
 //----------------------------------------------------------------------------------------------------------------------
 //Imports from VUE
 //----------------------------------------------------------------------------------------------------------------------
-import { ref } from 'vue'
-import type { Ref } from 'vue'
+import { ref } from 'vue';
+import type { Ref } from 'vue';
 //----------------------------------------------------------------------------------------------------------------------
-//SWAL Modal window for ONE TXT input
+//Quasar prompt dialogs
 //----------------------------------------------------------------------------------------------------------------------
-import inputModal from '@/API/Swal'
-//----------------------------------------------------------------------------------------------------------------------
-//MAPTORIUM CLASS to handle Language support
-//----------------------------------------------------------------------------------------------------------------------
-import Lang from '@/lang/index'
+import { usePrompt } from 'src/composables/usePrompt';
+const prompt = usePrompt();
 //----------------------------------------------------------------------------------------------------------------------
 //MAPTORIUM Routes class
 //----------------------------------------------------------------------------------------------------------------------
 class MAPTORIUMROUTES {
-  public routes: Ref<Array<RouteList>> = ref([])
-  public _callbacks: { [id: string]: CallableFunction } = {}
-  public readonly show: Ref<boolean> = ref(false)
+  public routes: Ref<Array<RouteList>> = ref([]);
+  public _callbacks: { [id: string]: CallableFunction } = {};
+  public readonly onMap: Ref<boolean> = ref(false);
   /**
    * Get routes history list from server
    */
-  public async List(): Promise<void> {
-    const data = (await request('/gps/routelist', {}, 'get')) as Array<RouteList> | false
-    if (data) this.routes.value = data
+  public async refresh(): Promise<void> {
+    const data = (await request('gps.routelist', {}, 'get')) as Array<RouteList> | false;
+    if (data) this.routes.value = data;
   }
   /**
    * Start new route
    */
-  public async New(): Promise<void> {
+  public async new(): Promise<void> {
     //Show input modal and get value from
-    const name = (await inputModal(Lang.value.TXT_GPS_ROUTE_NEW_NAME)) as false | string
+    const name = (await prompt(
+      'dialog.gps.route_new_name.title',
+      'dialog.gps.route_new_name.descr',
+    )) as false | string;
     //If value, send request
-    if (name) await request('/gps/routenew', { name: name }, 'post', true)
+    if (name) {
+      await request('gps.routenew', { name: name }, 'post', true);
+      await this.refresh();
+    }
   }
   /**
    * Get points for specific route
    * @param ID - Route ID from RouteList, default is 0 - current route
    */
-  public async Points(routeID: number = 0): Promise<Array<GPSCoords> | false> {
-    let alert = false
-    if (routeID > 0) alert = true
-    const routePoints = (await request(`/gps/route/${routeID}`, {}, 'get', alert)) as
+  public async points(routeID: number = 0): Promise<Array<GPSCoords> | false> {
+    let alert = false;
+    if (routeID > 0) alert = true;
+    const routePoints = (await request(`gps.route`, { routeID: routeID }, 'get', alert)) as
       | Array<GPSCoords>
-      | false
+      | false;
     if (routePoints) {
-      if (this.show.value) this._fire(RoutesEvents.route, routeID, routePoints)
-      return routePoints
+      if (this.onMap.value) this._fire(RoutesEvents.route, routeID, routePoints);
+      return routePoints;
     }
-    return false
+    return false;
   }
   /**
    * Fire event about new point in route
@@ -69,42 +72,63 @@ class MAPTORIUMROUTES {
    */
   public Point(lat: number, lng: number) {
     if (lat && lng) {
-      this._fire(RoutesEvents.point, lat, lng)
+      this._fire(RoutesEvents.point, lat, lng);
     }
   }
 
-  public Hide() {
-    this.show.value = false
-    this._fire(RoutesEvents.hide)
+  public hide() {
+    this.onMap.value = false;
+    this._fire(RoutesEvents.hide);
+  }
+
+  public show() {
+    this.onMap.value = true;
+    this.points().catch((e) => {
+      console.error(e.message);
+    });
+  }
+
+  toggle() {
+    if (this.onMap.value) {
+      this.hide();
+    } else {
+      this.show();
+    }
   }
 
   public on(event: RoutesEvents, callback: CallableFunction) {
     if (callback) {
-      this._callbacks[event] = callback
+      this._callbacks[event] = callback;
     }
   }
 
-  public _fire(event: RoutesEvents, data1?: any, data2?: any, data3?: any, data4?: any) {
+  public _fire(
+    event: RoutesEvents,
+    data1?: unknown,
+    data2?: unknown,
+    data3?: unknown,
+    data4?: unknown,
+  ) {
     if (this._callbacks[event]) {
-      this._callbacks[event](data1, data2, data3, data4)
+      this._callbacks[event](data1, data2, data3, data4);
     }
   }
 }
 //----------------------------------------------------------------------------------------------------------------------
 //INIT new MAPTORIUM Routes class
 //----------------------------------------------------------------------------------------------------------------------
-const Routes = new MAPTORIUMROUTES()
+const Routes = new MAPTORIUMROUTES();
 //----------------------------------------------------------------------------------------------------------------------
 //EXPORT new MAPTORIUM Routes class
 //----------------------------------------------------------------------------------------------------------------------
-export default Routes
+export default Routes;
 //----------------------------------------------------------------------------------------------------------------------
 //SOCKET.IO for realtime comunication
 //----------------------------------------------------------------------------------------------------------------------
-import socket from './Socket'
+import socket from 'src/API/Socket';
 //----------------------------------------------------------------------------------------------------------------------
 //SOCKET.IO new Route point event
 //----------------------------------------------------------------------------------------------------------------------
 socket.on('gps.routepoint', (data: { lat: number; lng: number }) => {
-  Routes.Point(data.lat, data.lng)
-})
+  Routes.Point(data.lat, data.lng);
+});

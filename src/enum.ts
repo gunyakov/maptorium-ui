@@ -1,30 +1,30 @@
 export enum eLanguageList {
   ru = 'ru',
-  en = 'en'
+  en = 'en',
 }
 
 export enum eMapType {
   map = 'map',
-  layer = 'layer'
+  layer = 'layer',
 }
 
 export enum eMapFormat {
   rasted = 'rasted',
-  vector = 'vector'
+  vector = 'vector',
 }
 
 export enum ResponseType {
   success = 'success',
   info = 'info',
   warning = 'warning',
-  error = 'error'
+  error = 'error',
 }
 //----------------------------------------------------------------------------------------------------------------------
 //List of GPS events
 //----------------------------------------------------------------------------------------------------------------------
 export enum GPSEvents {
   update = 'update',
-  center = 'center'
+  center = 'center',
 }
 //----------------------------------------------------------------------------------------------------------------------
 //List of Routes events
@@ -32,7 +32,7 @@ export enum GPSEvents {
 export enum RoutesEvents {
   route = 'route',
   point = 'point',
-  hide = 'hide'
+  hide = 'hide',
 }
 //----------------------------------------------------------------------------------------------------------------------
 //List of General API events
@@ -43,14 +43,14 @@ export enum APIEvents {
   mapAddLayer = 'map.layerAdd',
   mapRemoveLayer = 'map.layerRemove',
   cacheMap = 'cache.map',
-  cacheTile = 'cache.tile'
+  cacheTile = 'cache.tile',
 }
 export enum POIEvents {
   polygon = 'polygon',
   polyline = 'polyline',
   point = 'point',
   delete = 'delete',
-  update = 'update'
+  update = 'update',
 }
 //----------------------------------------------------------------------------------------------------------------------
 //List of Network modes
@@ -59,7 +59,7 @@ export enum NetworkMode {
   null = 'null',
   enable = 'enable',
   disable = 'disable',
-  force = 'force'
+  force = 'force',
 }
 //List of distance Unit conveters
 export enum DistanceUnits {
@@ -68,38 +68,49 @@ export enum DistanceUnits {
   mile = 1609,
   foot = 0.3048,
   yard = 0.9144,
-  meter = 1
+  meter = 1,
+}
+
+export enum SquareUnits {
+  hectare = 10000,
+  decare = 1000,
+  are = 100,
 }
 export enum POIType {
   point = 'point',
   polygon = 'polygon',
   polyline = 'polyline',
-  square = 'square'
+  square = 'square',
 }
 export enum JobType {
   download = 'download',
-  generate = 'generate'
+  generate = 'generate',
 }
 export enum DownloadMode {
   enable = 'enable',
   disable = 'disable',
-  force = 'force'
+  force = 'force',
 }
 
 export enum MAPEvents {
   init = 'init',
   POIRefresh = 'poi.refresh',
   ctxMenuShow = 'cxtmenu.show',
-  ctxMenuHide = 'ctxmenu.hide'
+  ctxMenuHide = 'ctxmenu.hide',
 }
 
 export enum ManagerItemType {
   folder = 'folder',
-  item = 'item'
+  item = 'item',
 }
 
 export enum TileInCache {
   missing = 'missing',
   present = 'present',
-  empty = 'empty'
+  empty = 'empty',
+}
+
+export enum GPSType {
+  tcp = 'TCP',
+  usb = 'USB',
 }

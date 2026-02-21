@@ -1,18 +1,18 @@
-import { io, Socket } from 'socket.io-client'
+import { io, type Socket } from 'socket.io-client';
 
 //-----------------------------------------------------------------------------------------------
 //SOCKET IO INIT
 //-----------------------------------------------------------------------------------------------
-const socket: Socket = io()
+const socket: Socket = io();
 //-----------------------------------------------------------------------------------------------
 //SOCKET DISCONNECT
 //-----------------------------------------------------------------------------------------------
 socket.on('disconnect', () => {
-  console.log('Disconnected')
-})
+  console.log('Disconnected');
+});
 socket.on('connect', () => {
   //refreshJobList()
-})
+});
 //-----------------------------------------------------------------------------------------------
 //SOCKET IO EVENTS
 //-----------------------------------------------------------------------------------------------
@@ -27,4 +27,4 @@ socket.on('connect', () => {
 //   fire(EventType.cachedTileMapTile, data)
 // })
 
-export default socket
+export default socket;

@@ -1,38 +1,27 @@
 <!doctype html>
-<html lang="en" data-menu="vertical" data-nav-size="nav-default">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>3.2.0 | Maptorium</title>
+    <title><%= productName %></title>
 
-    <link rel="shortcut icon" href="favicon.png" />
-    <link rel="stylesheet" href="assets/vendor/css/all.min.css" />
-    <link rel="stylesheet" href="assets/vendor/css/OverlayScrollbars.min.css" />
-    <link rel="stylesheet" href="assets/vendor/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="assets/vendor/css/sweetalert2.min.css" />
-    <link rel="stylesheet" href="assets/css/style.css" />
-    <link rel="stylesheet" href="assets/css/icons.min.css" />
-    <link rel="stylesheet" id="primaryColor" href="assets/css/blue-color.css" />
-    <link rel="stylesheet" href="assets/vendor/css/maplibre-gl.css" />
-    <link rel="stylesheet" id="rtlStyle" href="#" />
+    <meta charset="utf-8" />
+    <meta name="description" content="<%= productDescription %>" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta
+      name="viewport"
+      content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width<% if (ctx.mode.cordova || ctx.mode.capacitor) { %>, viewport-fit=cover<% } %>"
+    />
+    <link href="vendor/maplibre-gl.css" rel="stylesheet" />
+    <link href="vendor/mapbox-gl-draw.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" sizes="128x128" href="icons/favicon-128x128.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="icons/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png" />
+    <link rel="icon" type="image/ico" href="favicon.ico" />
   </head>
-  <body class="body-padding body-p-top">
-    <div id="app"></div>
-
-    <script src="assets/vendor/js/jquery-3.6.0.min.js"></script>
-    <script src="assets/vendor/js/jquery.overlayScrollbars.min.js"></script>
-    <script src="assets/vendor/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/vendor/js/sweetalert2.all.min.js"></script>
-
-    <script type="module" src="/src/main.ts"></script>
-
-    <script src="assets/js/main.js"></script>
-    <script>
-      var rtlReady = $('html').attr('dir', 'ltr')
-      if (rtlReady !== undefined) {
-        localStorage.setItem('layoutDirection', 'ltr')
-      }
-    </script>
+  <body>
+    <!-- quasar:entry-point -->
+    <script src="vendor/maplibre-gl.js"></script>
+    <script src="vendor/mapbox-gl-draw.js"></script>
   </body>
 </html>
