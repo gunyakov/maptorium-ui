@@ -57,7 +57,7 @@
               <q-item
                 clickable
                 v-close-popup
-                @click="Routes.show()"
+                @click="Routes.toggle()"
                 :class="{
                   'bg-primary': Routes.onMap.value,
                   'text-white': Routes.onMap.value,
@@ -66,7 +66,7 @@
                 <q-item-section>{{ $t('menu.gps.route.show') }}</q-item-section>
               </q-item>
               <q-separator />
-              <q-item clickable v-close-popup @click="Routes.toggle()">
+              <q-item clickable v-close-popup @click="GPS.New()">
                 <q-item-section>{{ $t('menu.gps.route.new') }}</q-item-section>
               </q-item>
               <q-item clickable v-close-popup @click="GPS.SampleTime()">
@@ -76,7 +76,7 @@
                 <q-item-section>{{ $t('menu.gps.route.distance_go') }}</q-item-section>
               </q-item>
               <q-separator />
-              <q-item clickable v-close-popup>
+              <q-item clickable v-close-popup @click="GPS.routeFromFileModal()">
                 <q-item-section>{{ $t('menu.gps.route.from_file') }}</q-item-section>
               </q-item>
             </q-list>
@@ -93,7 +93,7 @@
 
           <q-menu anchor="top end" self="top start">
             <q-list dense>
-              <q-item clickable v-close-popup>
+              <q-item clickable v-close-popup @click="routeHistory.clearRoutes()">
                 <q-item-section>{{ $t('menu.gps.history.clean') }}</q-item-section>
               </q-item>
               <q-separator />
@@ -103,6 +103,10 @@
                 v-for="(item, index) in Routes.routes.value"
                 :key="index"
                 @click="Routes.points(item.ID)"
+                :class="{
+                  'bg-primary': routeHistory.isVisible(item.ID),
+                  'text-white': routeHistory.isVisible(item.ID),
+                }"
               >
                 <q-item-section>{{ item.name }}</q-item-section>
               </q-item>
@@ -139,4 +143,7 @@
 <script setup lang="ts">
 import GPS from 'src/API/GPS';
 import Routes from 'src/API/Routes';
+import { useRouteHistoryStore } from 'src/stores/routeHistory';
+
+const routeHistory = useRouteHistoryStore();
 </script>

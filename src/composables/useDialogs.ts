@@ -1,6 +1,11 @@
 import { Dialog } from 'quasar';
 import GPSConfig from 'src/components/dialogs/GPSConfig.vue';
 import DistanceToGO from 'src/components/dialogs/DistanceToGO.vue';
+import GPSRouteFromFile from 'src/components/dialogs/GPSRouteFromFile.vue';
+import POIMove from 'src/components/dialogs/POIMove.vue';
+import Job from 'src/components/dialogs/Job.vue';
+import POIProperties from 'src/components/dialogs/POIProperties.vue';
+import FileSystemTree from 'src/components/dialogs/FileSystemTree.vue';
 import type { Component } from 'vue';
 
 export enum ModalsList {
@@ -10,6 +15,9 @@ export enum ModalsList {
   DistanceToGO = 'gps.distance_to_go',
   GPSConfig = 'gps.config',
   GPSRouteFromFile = 'gps.route_from_file',
+  POIMove = 'poi.move',
+  Job = 'job.main',
+  FileTree = 'filesystem_tree',
 }
 
 type DialogPayload = Record<string, unknown>;
@@ -19,12 +27,15 @@ interface ModalConfig {
 }
 
 const modalRegistry: Record<ModalsList, ModalConfig> = {
-  [ModalsList.POIConfig]: { component: GPSConfig },
+  [ModalsList.POIConfig]: { component: POIProperties },
   [ModalsList.CategoryConfig]: { component: GPSConfig },
   [ModalsList.CachedMap]: { component: GPSConfig },
   [ModalsList.DistanceToGO]: { component: DistanceToGO },
   [ModalsList.GPSConfig]: { component: GPSConfig },
-  [ModalsList.GPSRouteFromFile]: { component: GPSConfig },
+  [ModalsList.GPSRouteFromFile]: { component: GPSRouteFromFile },
+  [ModalsList.POIMove]: { component: POIMove },
+  [ModalsList.Job]: { component: Job },
+  [ModalsList.FileTree]: { component: FileSystemTree },
 };
 
 export const useDialogs = () => {

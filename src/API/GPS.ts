@@ -2,6 +2,7 @@
 //MAPTORIUM GPSCoords interface
 //----------------------------------------------------------------------------------------------------------------------
 import type { GPSCoords } from 'src/interface';
+import type { Feature, GeoJsonProperties, LineString } from 'geojson';
 //----------------------------------------------------------------------------------------------------------------------
 //List of GPS events
 //----------------------------------------------------------------------------------------------------------------------
@@ -30,6 +31,7 @@ import { usePrompt } from 'src/composables/usePrompt';
 const prompt = usePrompt();
 import { ModalsList, useDialogs } from 'src/composables/useDialogs';
 const dialogs = useDialogs();
+import { usePOIStore } from 'src/stores/poi';
 //----------------------------------------------------------------------------------------------------------------------
 //MAPTORIUM CLASS to handle GPS events and control GPS service on server
 //----------------------------------------------------------------------------------------------------------------------
@@ -50,7 +52,6 @@ class MAPTORIUMGPS {
   public speed: Ref<number> = ref(0);
   public dir: Ref<number> = ref(0);
   public time: Ref<string> = ref('');
-  public show: Ref<boolean> = ref(false);
   /**
    * Get current GPS from server and update
    */
@@ -218,6 +219,87 @@ class MAPTORIUMGPS {
       | string;
     //If value, send request
     if (time) await request<boolean>('gps.sample', { time: time }, 'post', true);
+  }
+
+  public async New(): Promise<void> {
+    const name = (await prompt(
+      'dialog.gps.route_new_name.title',
+      'dialog.gps.route_new_name.descr',
+    )) as false | string;
+    if (name) {
+      await request<boolean>('gps.routenew', { name: name }, 'post', true);
+    }
+  }
+
+  private _parseRouteCoordsFromFileContent(data: string): Array<[number, number]> {
+    const lines = data
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0 && !line.startsWith('//'));
+
+    const points: Array<[number, number]> = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const coord = lines[i]?.split(',').map((value) => value.trim()) ?? [];
+      if (coord.length < 7) continue;
+
+      const latDeg = Number.parseInt(coord[1] ?? '', 10);
+      const latMin = Number.parseFloat(coord[2] ?? '');
+      const latHemisphere = coord[3] ?? '';
+
+      const lngDeg = Number.parseInt(coord[4] ?? '', 10);
+      const lngMin = Number.parseFloat(coord[5] ?? '');
+      const lngHemisphere = coord[6] ?? '';
+
+      if (
+        Number.isNaN(latDeg) ||
+        Number.isNaN(latMin) ||
+        Number.isNaN(lngDeg) ||
+        Number.isNaN(lngMin)
+      ) {
+        continue;
+      }
+
+      let lat = latDeg + latMin / 60;
+      let lng = lngDeg + lngMin / 60;
+
+      if (latHemisphere === 'S') lat = -lat;
+      if (lngHemisphere === 'W') lng = -lng;
+
+      if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        points.push([lng, lat]);
+      }
+    }
+
+    return points;
+  }
+
+  /** Read route from file and display on map */
+  public async routeFromFileModal() {
+    const routeFile = (await dialogs(ModalsList.GPSRouteFromFile)) as false | File;
+    if (!routeFile) return;
+
+    const data = await routeFile.text();
+    if (!data) return;
+
+    const routePoints = this._parseRouteCoordsFromFileContent(data);
+    if (routePoints.length < 2) return;
+
+    const poiStore = usePOIStore();
+    const routeName = poiStore.nextRouteName();
+    const feature: Feature<LineString, GeoJsonProperties> = {
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: routePoints,
+      },
+      properties: {
+        name: routeName,
+        folderID: null,
+      },
+    };
+
+    poiStore.addDrawing(feature);
   }
   /**
    * SET distance to go for time calculation

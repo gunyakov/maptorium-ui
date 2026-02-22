@@ -1,14 +1,163 @@
 export default {
   request: {
     timeout: 'Request $ was aborted due to timeout.',
+    job: {
+      list: {
+        empty: 'Job list is empty.',
+      },
+      download: {
+        added: 'Job added to queue.',
+      },
+      generate: {
+        added: 'Generate job added to queue.',
+      },
+      start: {
+        success: 'Job was started.',
+      },
+      stop: {
+        success: 'Job was stopped.',
+      },
+      up: {
+        success: 'Job was moved up in queue.',
+        failed: 'Job can’t be moved up in queue.',
+      },
+      down: {
+        success: 'Job was moved down in queue.',
+        failed: 'Job can’t be moved down in queue.',
+      },
+      delete: {
+        success: 'Job was deleted from queue.',
+        failed: 'Job can’t be deleted from queue.',
+      },
+      queue: {
+        job_not_found: 'Can’t find job in queue by ID. Skip.',
+      },
+      validation: {
+        body_invalid: 'Invalid request body. Skip add job to queue.',
+        download_invalid: 'Download config is invalid. Skip add job to queue.',
+        polygon_invalid: 'Polygon points are invalid. Skip add job to queue.',
+        custom_network_invalid: 'customNetworkConfig must be boolean.',
+        network_invalid: 'Network config is invalid. Skip add job to queue.',
+        map_handler_missing: 'Can’t find map handler by map ID. Skip.',
+        generate_id_invalid: 'Invalid generate job ID. Skip add job to queue.',
+        map_id_invalid: 'Invalid map ID. Skip add job to queue.',
+        zoom_empty: 'Zooms list is empty.',
+        zoom_invalid: 'Zooms list contains invalid values.',
+        from_zoom_invalid: 'Invalid base zoom value.',
+        generate_flags_invalid: 'Generate flags are invalid. Skip add job to queue.',
+        generate_zoom_relation_invalid: 'Generated zooms must be less than base zoom.',
+      },
+    },
+    core: {
+      default: {
+        updated: 'Default config was updated.',
+        updated_with_save_warning: 'Default config was updated, but saving finished with warnings.',
+        api_keys: {
+          map_id_read_failed: 'Can’t read map ID from request.',
+          map_id_missing: 'Map ID is missing in maps list. Please check map ID.',
+        },
+      },
+      mode: {
+        updated: 'Network mode was updated.',
+        updated_with_save_warning: 'Network mode was changed, but saving finished with warnings.',
+      },
+      map_storage: {
+        map_id_missing: 'Map ID is missing.',
+        path_missing: 'Storage path is missing.',
+        path_invalid: 'Selected path is invalid or not a folder.',
+        update_failed: 'Unable to update map storage path.',
+        updated: 'Map storage path was updated.',
+      },
+    },
+    map: {
+      cached: {
+        poi_id_invalid: 'Can’t read POI ID. Abort tile calculation.',
+        zoom_invalid: 'Error reading zoom value. Abort tile calculation.',
+        map_handler_missing: 'Can’t get map handler by map ID. Abort tile calculation.',
+        poi_not_found: 'Can’t find POI in DB. Abort tile calculation.',
+        poi_not_polygon: 'Abort tile calculation. POI type is not Polygon.',
+        build_started: 'Cached map building started. Wait for result.',
+        build_canceled: 'Cached map building canceled.',
+        cleaned: 'Tile cached map was cleaned from memory.',
+      },
+    },
+    poi: {
+      category: {
+        list_empty: 'Category list is empty.',
+        add: {
+          success: 'Category was inserted in DB.',
+          failed: 'Error adding category to DB.',
+        },
+        update: {
+          success: 'Category was updated in DB.',
+          failed: 'Error updating category in DB.',
+        },
+        delete: {
+          success: 'Category was deleted from DB.',
+          failed: 'Error deleting category from DB.',
+        },
+      },
+      info: {
+        not_found: 'No data about POI in DB.',
+      },
+      update: {
+        success: 'POI was updated.',
+        failed: 'Error updating POI.',
+        empty_data: 'Empty POI data. Skip update.',
+        exception: 'Unexpected error while updating POI.',
+        exception_unknown: 'Unknown error while updating POI.',
+      },
+      list: {
+        category_empty: 'Category is empty.',
+      },
+      delete: {
+        success: 'POI was deleted from map.',
+        failed: 'Error deleting POI from DB.',
+        id_empty: 'POI ID is empty. Skip.',
+      },
+      add: {
+        success: 'POI was added to DB.',
+        failed: 'Error adding POI to DB.',
+        empty_data: 'Empty data sent to server.',
+        exception: 'Unexpected error while adding POI.',
+        exception_unknown: 'Unknown error while adding POI.',
+      },
+      mark_add: {
+        name_invalid: 'Can’t read Name value. Skip Add Mark.',
+        category_id_invalid: 'Can’t read Category ID value. Skip Add Mark.',
+        coords_invalid: 'Can’t read LNG or LAT value. Skip Add Mark.',
+        success: 'Mark was added to DB.',
+        failed: 'Error adding Mark to DB.',
+      },
+    },
+  },
+  toast: {
+    storage: {
+      updated: 'Storage path updated.',
+      save_failed: 'Unable to save map storage path.',
+    },
   },
   menu: {
     maps: 'Maps',
     layers: 'Layers',
     view: {
       root: 'View',
+      dark_mode: 'Dark mode',
       tile_grid: 'Tile Grid',
       clear_tile_grid: 'Remove Tile Grid',
+      poi_manager: 'POI Manager',
+      gps_info: 'GPS info',
+      job_manager: 'Job Manager',
+      poi_manager_actions: {
+        create: 'Create folder',
+        rename: 'Rename folder',
+        move: 'Move folder',
+        delete: 'Delete folder',
+        delete_title: 'Delete?',
+        delete_confirm: 'Delete folder "{name}"? Child folders and POIs will be moved to parent.',
+        delete_poi_confirm: 'Delete POI "{name}"?',
+        root: 'Root',
+      },
     },
     draw: {
       root: 'Draw',
@@ -26,6 +175,7 @@ export default {
         move: 'Move',
         edit: 'Edit',
         delete: 'Delete',
+        download: 'Download...',
       },
       measure: {
         title: 'Measure',
@@ -74,6 +224,19 @@ export default {
     },
   },
   txt: {
+    job: {
+      size: 'Size',
+      tiles: 'Tiles',
+      ese: 'E/S/E',
+      time: 'Time',
+      eta: 'ETA',
+      empty: 'No active jobs.',
+      actions: {
+        up: 'Up',
+        delete: 'Delete',
+        down: 'Down',
+      },
+    },
     gps: {
       type: {
         label: 'GPS Type',
@@ -81,6 +244,29 @@ export default {
         usb: 'USB',
       },
       sample_time: 'Enter GPS sample time, sec:',
+      info: {
+        distance_run: 'Distance run',
+        distance_to_go: 'Distance to go',
+        time_to_go: 'Time to go',
+        speed: 'Speed',
+        course: 'Course',
+        distance_units: {
+          meter: 'm',
+          kilometer: 'km',
+          mile: 'mi',
+          nmile: 'nmi',
+          yard: 'yd',
+          foot: 'ft',
+        },
+        speed_units: {
+          meter: 'm/h',
+          kilometer: 'km/h',
+          mile: 'mi/h',
+          nmile: 'nmi/h',
+          yard: 'yd/h',
+          foot: 'ft/h',
+        },
+      },
       started: 'GPS Service started.',
       stopped: 'GPS Service stopped.',
       enable_recording: 'Enable recording route',
@@ -116,6 +302,9 @@ export default {
       },
       route_from_file: {
         title: 'Route from file',
+        descr: 'Select route file',
+        label: 'Route file',
+        hint: 'CSV/TXT in GPS route format',
       },
       distance_to_go: {
         title: 'Distance to destination:',
@@ -126,6 +315,53 @@ export default {
       route_new_name: {
         title: 'New route name',
         descr: 'Enter name for new route. It will be used in history list.',
+      },
+    },
+    job: {
+      main: {
+        title: 'Download tiles',
+        tabs: {
+          download: 'Job',
+          network: 'Network',
+        },
+        map: 'Map',
+        zoom: 'Zoom',
+        random_download: 'Random download mode',
+        overwrite_old_tiles: 'Overwrite old tiles',
+        overwrite_different_tiles: 'Overwrite old tiles only if different',
+        overwrite_before_date: 'Overwrite tiles before date',
+        save_empty_tiles: 'Save empty tiles',
+        overwrite_empty_tiles: 'Overwrite empty tiles',
+        custom_network: 'Custom network settings',
+        delay: 'Delay (ms)',
+        timeout: 'Timeout (ms)',
+        agent: 'User-Agent',
+        ban_time_mode: 'Ban time mode',
+        proxy_custom: 'Use proxy',
+        proxy_protocol: 'Proxy protocol',
+        proxy_host: 'Proxy host',
+        proxy_port: 'Proxy port',
+        proxy_auth: 'Proxy auth required',
+        proxy_user: 'Proxy username',
+        proxy_password: 'Proxy password',
+      },
+    },
+    filesystem_tree: {
+      title: 'Storage folder: {name}',
+      create: {
+        title: 'Create folder',
+        message: 'Folder name',
+      },
+      rename: {
+        title: 'Rename folder',
+        message: 'New folder name',
+      },
+      errors: {
+        read_folder: 'Unable to read folder.',
+        create_folder: 'Unable to create folder.',
+        rename_folder: 'Unable to rename folder.',
+        read_server_folder: 'Unable to read server folder.',
+        select_folder_to_rename: 'Select folder to rename.',
       },
     },
     cached_map: {

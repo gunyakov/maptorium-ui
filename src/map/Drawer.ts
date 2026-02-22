@@ -5,12 +5,16 @@ import { useDrawMeasure } from 'src/composables/useDrawMeasure';
 import EPSG3857 from 'src/helpers/EPSG3857';
 import type { Feature, GeoJsonProperties, Geometry, Polygon, Position } from 'geojson';
 import { DistanceUnits, SquareUnits } from 'src/enum';
+import JobManager from 'src/API/JobManager';
+import { ModalsList, useDialogs } from 'src/composables/useDialogs';
+import type { iJobConfig } from 'src/interface';
 import * as turf from '@turf/turf';
 import { ref } from 'vue';
 
 export type DrawMenuItem = 'point' | 'polyline' | 'polygon' | 'tile_square';
 
 export const activeDrawMenuItem = ref<DrawMenuItem | null>(null);
+const dialogs = useDialogs();
 
 type DrawerControlsMode = 'hidden' | 'draw' | 'modify';
 type ModifyMode = 'move' | 'edit';
@@ -674,6 +678,14 @@ class Drawer implements maplibregl.IControl {
   private _assignDefaultPOINames(features: Array<Feature<Geometry, GeoJsonProperties>>) {
     const poiStore = usePOIStore();
     features.forEach((feature) => {
+      feature.properties = {
+        ...(feature.properties ?? {}),
+      };
+
+      if (!Object.prototype.hasOwnProperty.call(feature.properties, 'folderID')) {
+        feature.properties.folderID = null;
+      }
+
       const existingName = feature.properties?.name;
       if (typeof existingName === 'string' && existingName.trim().length > 0) {
         return;
@@ -695,6 +707,18 @@ class Drawer implements maplibregl.IControl {
       const originalId = this._modifyOriginalFeature?.id;
       if (normalized && originalId != null) {
         normalized.id = originalId;
+      }
+      if (
+        normalized &&
+        !Object.prototype.hasOwnProperty.call(normalized.properties ?? {}, 'folderID')
+      ) {
+        normalized.properties = {
+          ...(normalized.properties ?? {}),
+          folderID:
+            typeof this._modifyOriginalFeature?.properties?.folderID === 'number'
+              ? this._modifyOriginalFeature.properties.folderID
+              : null,
+        };
       }
       if (normalized) {
         poiStore.setDrawings(
@@ -809,10 +833,53 @@ class Drawer implements maplibregl.IControl {
         this._deleteFeature(featureId);
       }),
     );
+
+    if (geometryType === 'Polygon') {
+      this._contextMenu.appendChild(
+        this._createContextMenuItem(t('menu.draw.context.download'), 'download', () => {
+          void this._startDownloadJob(featureId);
+        }),
+      );
+    }
+
     this._contextMenu.appendChild(this._createContextMenuSeparator());
     this._contextMenu.appendChild(
       this._createContextMenuItem(t('menu.draw.context.properties'), 'settings', () => {
         this._hideContextMenu();
+        void (async () => {
+          const { useDialogs, ModalsList } = await import('src/composables/useDialogs');
+          const { usePOIStore } = await import('src/stores/poi');
+          const dialogs = useDialogs();
+          const poiStore = usePOIStore();
+          const storeFeature = this._getStoredFeatureById(featureId);
+          const result = (await dialogs(ModalsList.POIConfig, {
+            poi: storeFeature,
+            modelValue: true,
+          })) as
+            | false
+            | { color?: string; width?: number; fillColor?: string; fillOpacity?: number };
+          if (result) {
+            const updatedDrawings = poiStore.drawings.map(
+              (item: Feature<Geometry, GeoJsonProperties>) => {
+                if (item.id === featureId) {
+                  return {
+                    ...item,
+                    properties: {
+                      ...(item.properties || {}),
+                      color: result.color,
+                      width: result.width,
+                      fillColor: result.fillColor,
+                      fillOpacity: result.fillOpacity,
+                    },
+                  };
+                }
+                return item;
+              },
+            );
+            poiStore.setDrawings(updatedDrawings);
+            this._syncPOILayersAndData();
+          }
+        })();
       }),
     );
 
@@ -820,6 +887,55 @@ class Drawer implements maplibregl.IControl {
     this._contextMenu.style.left = `${clientX - rect.left}px`;
     this._contextMenu.style.top = `${clientY - rect.top}px`;
     this._contextMenu.style.display = '';
+  }
+
+  private async _startDownloadJob(featureId: DrawFeatureId) {
+    const storeFeature = this._getStoredFeatureById(featureId);
+    const polygonCoords =
+      storeFeature?.geometry?.type === 'Polygon'
+        ? storeFeature.geometry.coordinates?.[0]
+        : undefined;
+    if (!polygonCoords || polygonCoords.length < 3) {
+      return;
+    }
+
+    const polygonPoints = polygonCoords
+      .map((coord) => {
+        if (!Array.isArray(coord) || coord.length < 2) return null;
+        const lng = Number(coord[0]);
+        const lat = Number(coord[1]);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+        return { lat, lng };
+      })
+      .filter((point): point is { lat: number; lng: number } => point !== null);
+
+    if (polygonPoints.length < 3) {
+      return;
+    }
+
+    const firstPoint = polygonPoints[0];
+    const lastPoint = polygonPoints[polygonPoints.length - 1];
+    if (
+      firstPoint &&
+      lastPoint &&
+      firstPoint.lat === lastPoint.lat &&
+      firstPoint.lng === lastPoint.lng
+    ) {
+      polygonPoints.pop();
+    }
+
+    const polygonID = Number(featureId);
+    const normalizedPolygonID = Number.isFinite(polygonID) ? polygonID : 0;
+
+    const data = (await dialogs(ModalsList.Job, {
+      polygonID: normalizedPolygonID,
+      polygonPoints,
+    })) as false | iJobConfig;
+    if (!data) {
+      return;
+    }
+
+    await JobManager.Add(data);
   }
 
   private _createContextMenuItem(

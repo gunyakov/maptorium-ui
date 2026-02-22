@@ -10,6 +10,7 @@ import { RoutesEvents } from 'src/enum';
 //MAPTORIUM CLASS to get data from Server
 //----------------------------------------------------------------------------------------------------------------------
 import request from 'src/API/ajax';
+import { requestPath } from 'src/API/ajax';
 //----------------------------------------------------------------------------------------------------------------------
 //Imports from VUE
 //----------------------------------------------------------------------------------------------------------------------
@@ -20,6 +21,7 @@ import type { Ref } from 'vue';
 //----------------------------------------------------------------------------------------------------------------------
 import { usePrompt } from 'src/composables/usePrompt';
 const prompt = usePrompt();
+import { useRouteHistoryStore } from 'src/stores/routeHistory';
 //----------------------------------------------------------------------------------------------------------------------
 //MAPTORIUM Routes class
 //----------------------------------------------------------------------------------------------------------------------
@@ -27,6 +29,13 @@ class MAPTORIUMROUTES {
   public routes: Ref<Array<RouteList>> = ref([]);
   public _callbacks: { [id: string]: CallableFunction } = {};
   public readonly onMap: Ref<boolean> = ref(false);
+
+  constructor() {
+    this.refresh().catch((e) => {
+      console.error(e?.message ?? e);
+    });
+  }
+
   /**
    * Get routes history list from server
    */
@@ -54,12 +63,22 @@ class MAPTORIUMROUTES {
    * @param ID - Route ID from RouteList, default is 0 - current route
    */
   public async points(routeID: number = 0): Promise<Array<GPSCoords> | false> {
-    let alert = false;
-    if (routeID > 0) alert = true;
-    const routePoints = (await request(`gps.route`, { routeID: routeID }, 'get', alert)) as
+    const historyStore = useRouteHistoryStore();
+
+    if (routeID > 0 && historyStore.isVisible(routeID)) {
+      historyStore.removeRoute(routeID);
+      return false;
+    }
+
+    const alert = routeID > 0;
+    const routePoints = (await requestPath(`/gps/route/${routeID}`, {}, 'get', alert)) as
       | Array<GPSCoords>
       | false;
+
     if (routePoints) {
+      if (routeID > 0) {
+        historyStore.setRoute(routeID, routePoints);
+      }
       if (this.onMap.value) this._fire(RoutesEvents.route, routeID, routePoints);
       return routePoints;
     }

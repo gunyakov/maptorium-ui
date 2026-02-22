@@ -20,6 +20,7 @@ export interface iMapItem {
   content: string;
   format: eMapFormat;
   submenu: string;
+  storagePath?: string;
 }
 
 export interface GPSCoords {
@@ -114,6 +115,7 @@ export interface iGenJobConfig {
   ID: string;
   mapID: string;
   polygonID: number;
+  polygon: Array<GPSCoords>;
   zoom: Array<string>;
   updateTiles: boolean;
   completeTiles: boolean;
@@ -178,6 +180,7 @@ export interface iJobInfo {
 }
 export interface iJobConfig {
   polygonID: number;
+  polygon: Array<GPSCoords>;
   customNetworkConfig: boolean;
   network?: iNetworkConfig;
   download?: iJobInfo;

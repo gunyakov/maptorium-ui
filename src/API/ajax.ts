@@ -18,8 +18,21 @@ import { t } from 'src/i18n';
 
 const urlList = {
   'core.maps': '/core/maps',
+  'core.mapStorage': '/core/map-storage',
   'core.default': '/core/default',
   'core.mode': '/core/mode',
+  'fs.current': '/fs/current',
+  'fs.list': '/fs/list',
+  'fs.create': '/fs/create',
+  'fs.rename': '/fs/rename',
+  'job.start': '/job/start',
+  'job.stop': '/job/stop',
+  'job.list': '/job/list',
+  'job.download': '/job/download',
+  'job.generate': '/job/generate',
+  'job.up': '/job/up',
+  'job.delete': '/job/delete',
+  'job.down': '/job/down',
   'gps.now': '/gps/now',
   'gps.start': '/gps/start',
   'gps.stop': '/gps/stop',
@@ -122,5 +135,18 @@ export function requestPath<T = unknown>(
 ): Promise<T | boolean> {
   //const url = joinBaseWithPath(path);
   const url = path;
+  return executeRequest<T>(url, data, method, alert);
+}
+
+export function requestByKeyPath<T = unknown>(
+  urlKey: UrlKey,
+  path: string,
+  data = {},
+  method: string = 'get',
+  alert: boolean = false,
+): Promise<T | boolean> {
+  const basePath = urlList[urlKey];
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const url = joinBaseWithPath(`${basePath}${normalizedPath}`);
   return executeRequest<T>(url, data, method, alert);
 }

@@ -6,6 +6,7 @@ import { type SettingsStore, useSettingsStore } from 'src/stores/settings';
 import { layerManipulator } from 'src/map/LayerManipulator';
 import { drawer } from 'src/map/Drawer';
 import TileGrid from 'src/map/TileGrid';
+import { setInfoBarCoords, setInfoBarZoom } from 'src/composables/useInfoBar';
 //--------------------------------------------------------------------------
 //Map class to handle all nessesary functions
 //--------------------------------------------------------------------------
@@ -63,6 +64,9 @@ class MaptoriumMap {
       //---------------------------------------------------------------------------
       //Add layer manipulator control
       //---------------------------------------------------------------------------
+      setInfoBarCoords(this._config.lat, this._config.lng);
+      setInfoBarZoom(this._config.zoom);
+
       this._map.addControl(layerManipulator, 'top-right');
       this._map.addControl(drawer, 'top-right');
       this._map.addControl(TileGrid, 'top-right');
@@ -73,7 +77,9 @@ class MaptoriumMap {
       });
 
       this._map.on('styledata', () => {});
-
+      //------------------------------------------------------------------------
+      //Save current map center+zoom, to restore after loading
+      //------------------------------------------------------------------------
       this._map.on('moveend', () => {
         this._mapMoveCount++;
         if (this._mapMoveCount > 2) {
@@ -81,29 +87,19 @@ class MaptoriumMap {
           this._config.lat = coords?.lat as number;
           this._config.lng = coords?.lng as number;
           this._config.zoom = this._map?.getZoom() as number;
+          setInfoBarZoom(this._config.zoom);
         }
+      });
+      this._map.on('mousemove', (e) => {
+        setInfoBarCoords(e.lngLat.lat, e.lngLat.lng);
+      });
+
+      this._map.on('zoom', () => {
+        setInfoBarZoom(this._map?.getZoom() as number);
       });
 
       //
     }
-    //------------------------------------------------------------------------
-    //Save current map center+zoom, to restore after loading
-    //------------------------------------------------------------------------
-    this._map.on('moveend', () => {
-      //Increase movement counter for 1
-      this._moveCounter++;
-      //If move counter less tahn 4, skip action.
-      //Required to prevent initial map move trigers, when
-      //called set mapCenter what is trigered moveend also.
-      if (this._moveCounter < 4) return;
-      if (!this._map) return;
-      //Get map center
-      const coords = this._map.getCenter();
-      //If coords is 0, map was initialy loaded, skip setting default coords
-      if (coords.lat != 0 && coords.lng != 0) this._config.lat = coords.lat;
-      this._config.lng = coords.lng;
-      this._config.zoom = Math.round(this._map.getZoom());
-    });
     return this._map;
   }
 }

@@ -6,6 +6,10 @@ export const useSettingsStore = defineStore('settings', {
     lng: 23.32415,
     zoom: 12,
     locale: 'gb',
+    darkMode: false,
+    jobManager: false,
+    poiManager: false,
+    gpsInfo: false,
     units: 'nmile' as keyof typeof DistanceUnits,
     square: ['hectare'] as Array<keyof typeof SquareUnits>,
     logsLength: 10,
@@ -20,6 +24,18 @@ export const useSettingsStore = defineStore('settings', {
     },
     set_locale(locale: string) {
       this.locale = locale;
+    },
+    set_darkMode(value: boolean) {
+      this.darkMode = value;
+    },
+    set_jobManager(value: boolean) {
+      this.jobManager = value;
+    },
+    set_poiManager(value: boolean) {
+      this.poiManager = value;
+    },
+    set_gpsInfo(value: boolean) {
+      this.gpsInfo = value;
     },
     set_units(units: keyof typeof DistanceUnits) {
       this.units = units;
