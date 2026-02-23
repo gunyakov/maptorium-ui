@@ -1,14 +1,13 @@
 import type {
   eMapType,
   eMapFormat,
-  NetworkMode,
   POIType,
   JobType,
   DownloadMode,
   ManagerItemType,
   TileInCache,
-  DistanceUnits,
-  SquareUnits,
+  GPSType,
+  NetworkMode,
 } from './enum';
 export interface iMapItem {
   id: string;
@@ -54,18 +53,22 @@ export interface DefaultConfig {
   lat: number;
   lng: number;
   zoom: number;
-  showRoute?: boolean;
-  recordRoute?: boolean;
-  gpsSampleTime?: number;
-  mode?: NetworkMode;
-  jobManager?: boolean;
-  poiManager?: boolean;
-  GPSInfoPanel?: boolean;
-  distanceToGo?: number;
+  showRoute: boolean;
+  recordRoute: boolean;
+  gpsSampleTime: number;
+  mode: NetworkMode;
+  jobManager: boolean;
   gpsServiceRun?: boolean;
-  style?: string;
-  units?: keyof typeof DistanceUnits;
-  square?: Array<keyof typeof SquareUnits>;
+  gpsServer?: GPSConfig;
+  apiKeys?: { [id: string]: string };
+  mapStoragePaths?: { [id: string]: string };
+}
+
+export interface GPSConfig {
+  host: string;
+  port: number;
+  type: GPSType;
+  device: string;
 }
 export interface RouteList {
   ID: number;
@@ -210,7 +213,7 @@ export interface CachedTilesInfo {
 
 export interface USBDevice {
   path: string;
-  manufacturer: string;
+  manufacturer?: string;
   friendlyName?: string;
 }
 

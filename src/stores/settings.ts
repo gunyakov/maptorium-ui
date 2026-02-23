@@ -4,7 +4,7 @@ export const useSettingsStore = defineStore('settings', {
   state: () => ({
     lat: 42.69751,
     lng: 23.32415,
-    zoom: 12,
+    zoom: 3.16,
     locale: 'gb',
     darkMode: false,
     jobManager: false,
@@ -13,6 +13,7 @@ export const useSettingsStore = defineStore('settings', {
     units: 'nmile' as keyof typeof DistanceUnits,
     square: ['hectare'] as Array<keyof typeof SquareUnits>,
     logsLength: 10,
+    globe: true,
   }),
   actions: {
     set_coordinates(lat: number, lng: number) {
@@ -27,6 +28,9 @@ export const useSettingsStore = defineStore('settings', {
     },
     set_darkMode(value: boolean) {
       this.darkMode = value;
+    },
+    set_globe(value: boolean) {
+      this.globe = value;
     },
     set_jobManager(value: boolean) {
       this.jobManager = value;

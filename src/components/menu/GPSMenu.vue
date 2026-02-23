@@ -19,8 +19,8 @@
                 v-close-popup
                 @click="GPS.toggle()"
                 :class="{
-                  'bg-primary': GPS.run.value,
-                  'text-white': GPS.run.value,
+                  'bg-primary': gps.run.value,
+                  'text-white': gps.run.value,
                 }"
               >
                 <q-item-section>{{ $t('menu.gps.start') }}</q-item-section>
@@ -48,8 +48,8 @@
                 v-close-popup
                 @click="GPS.toggleRecord()"
                 :class="{
-                  'bg-primary': GPS.record.value,
-                  'text-white': GPS.record.value,
+                  'bg-primary': gps.record.value,
+                  'text-white': gps.record.value,
                 }"
               >
                 <q-item-section>{{ $t('menu.gps.route.record') }}</q-item-section>
@@ -102,7 +102,7 @@
                 v-close-popup
                 v-for="(item, index) in Routes.routes.value"
                 :key="index"
-                @click="Routes.points(item.ID)"
+                @click="Routes.Points(item.ID)"
                 :class="{
                   'bg-primary': routeHistory.isVisible(item.ID),
                   'text-white': routeHistory.isVisible(item.ID),
@@ -122,8 +122,8 @@
         </q-item>
         <q-item
           clickable
-          @click="GPS.center.value = !GPS.center.value"
-          :class="{ 'bg-primary': GPS.center.value, 'text-white': GPS.center.value }"
+          @click="gps.center.value = !gps.center.value"
+          :class="{ 'bg-primary': gps.center.value, 'text-white': gps.center.value }"
         >
           <q-item-section side>
             <q-icon name="mdi-axis-arrow-lock" />
@@ -141,9 +141,10 @@
   </div>
 </template>
 <script setup lang="ts">
+import { useGPS } from 'src/composables/useGPS';
 import GPS from 'src/API/GPS';
 import Routes from 'src/API/Routes';
 import { useRouteHistoryStore } from 'src/stores/routeHistory';
-
+const gps = useGPS();
 const routeHistory = useRouteHistoryStore();
 </script>

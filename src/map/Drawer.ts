@@ -10,6 +10,7 @@ import { ModalsList, useDialogs } from 'src/composables/useDialogs';
 import type { iJobConfig } from 'src/interface';
 import * as turf from '@turf/turf';
 import { ref } from 'vue';
+import request from 'src/API/ajax';
 
 export type DrawMenuItem = 'point' | 'polyline' | 'polygon' | 'tile_square';
 
@@ -840,6 +841,11 @@ class Drawer implements maplibregl.IControl {
           void this._startDownloadJob(featureId);
         }),
       );
+      this._contextMenu.appendChild(
+        this._createContextMenuItem(t('menu.draw.context.cached_map'), 'layers', () => {
+          void this._startCachedMap(featureId);
+        }),
+      );
     }
 
     this._contextMenu.appendChild(this._createContextMenuSeparator());
@@ -890,39 +896,8 @@ class Drawer implements maplibregl.IControl {
   }
 
   private async _startDownloadJob(featureId: DrawFeatureId) {
-    const storeFeature = this._getStoredFeatureById(featureId);
-    const polygonCoords =
-      storeFeature?.geometry?.type === 'Polygon'
-        ? storeFeature.geometry.coordinates?.[0]
-        : undefined;
-    if (!polygonCoords || polygonCoords.length < 3) {
-      return;
-    }
-
-    const polygonPoints = polygonCoords
-      .map((coord) => {
-        if (!Array.isArray(coord) || coord.length < 2) return null;
-        const lng = Number(coord[0]);
-        const lat = Number(coord[1]);
-        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-        return { lat, lng };
-      })
-      .filter((point): point is { lat: number; lng: number } => point !== null);
-
-    if (polygonPoints.length < 3) {
-      return;
-    }
-
-    const firstPoint = polygonPoints[0];
-    const lastPoint = polygonPoints[polygonPoints.length - 1];
-    if (
-      firstPoint &&
-      lastPoint &&
-      firstPoint.lat === lastPoint.lat &&
-      firstPoint.lng === lastPoint.lng
-    ) {
-      polygonPoints.pop();
-    }
+    const polygonPoints = this._extractPolygonPoints(featureId);
+    if (!polygonPoints) return;
 
     const polygonID = Number(featureId);
     const normalizedPolygonID = Number.isFinite(polygonID) ? polygonID : 0;
@@ -936,6 +911,73 @@ class Drawer implements maplibregl.IControl {
     }
 
     await JobManager.Add(data);
+  }
+
+  private async _startCachedMap(featureId: DrawFeatureId) {
+    const polygonPoints = this._extractPolygonPoints(featureId);
+    if (!polygonPoints) return;
+
+    const polygonID = Number(featureId);
+    const normalizedPolygonID = Number.isFinite(polygonID) ? polygonID : 0;
+
+    const data = (await dialogs(ModalsList.CachedMap, {
+      polygonID: normalizedPolygonID,
+      polygonPoints,
+    })) as false | { mapID: string; zoom: number };
+
+    if (!data || !data.mapID || !Number.isFinite(data.zoom)) return;
+
+    await request(
+      'cached.poi',
+      {
+        poiID: normalizedPolygonID,
+        map: data.mapID,
+        zoom: data.zoom,
+        polygon: polygonPoints,
+      },
+      'post',
+      true,
+    );
+  }
+
+  private _extractPolygonPoints(
+    featureId: DrawFeatureId,
+  ): Array<{ lat: number; lng: number }> | null {
+    const storeFeature = this._getStoredFeatureById(featureId);
+    const polygonCoords =
+      storeFeature?.geometry?.type === 'Polygon'
+        ? storeFeature.geometry.coordinates?.[0]
+        : undefined;
+    if (!polygonCoords || polygonCoords.length < 3) {
+      return null;
+    }
+
+    const polygonPoints = polygonCoords
+      .map((coord) => {
+        if (!Array.isArray(coord) || coord.length < 2) return null;
+        const lng = Number(coord[0]);
+        const lat = Number(coord[1]);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+        return { lat, lng };
+      })
+      .filter((point): point is { lat: number; lng: number } => point !== null);
+
+    if (polygonPoints.length < 3) {
+      return null;
+    }
+
+    const firstPoint = polygonPoints[0];
+    const lastPoint = polygonPoints[polygonPoints.length - 1];
+    if (
+      firstPoint &&
+      lastPoint &&
+      firstPoint.lat === lastPoint.lat &&
+      firstPoint.lng === lastPoint.lng
+    ) {
+      polygonPoints.pop();
+    }
+
+    return polygonPoints;
   }
 
   private _createContextMenuItem(
@@ -1617,6 +1659,12 @@ class Drawer implements maplibregl.IControl {
       const polygonFillOpacity = poiStore.style.polygonFillOpacity;
       const polygonBorderWidth = poiStore.style.polygonBorderWidth;
 
+      const lineColorExpr: unknown = ['coalesce', ['get', 'color'], polygonColor];
+      const lineWidthExpr: unknown = ['coalesce', ['get', 'width'], polygonBorderWidth];
+      const fillColorExpr: unknown = ['coalesce', ['get', 'fillColor'], polygonFillColor];
+      const fillOpacityExpr: unknown = ['coalesce', ['get', 'fillOpacity'], polygonFillOpacity];
+      const pointRadiusExpr: unknown = ['max', ['coalesce', ['get', 'width'], 5], 1];
+
       if (!this._map.getSource(POI_SOURCE_ID)) {
         this._map.addSource(POI_SOURCE_ID, {
           type: 'geojson',
@@ -1644,11 +1692,16 @@ class Drawer implements maplibregl.IControl {
           source: POI_SOURCE_ID,
           filter: ['==', '$type', 'Polygon'],
           paint: {
-            'fill-color': polygonFillColor,
-            'fill-outline-color': polygonColor,
-            'fill-opacity': polygonFillOpacity,
+            'fill-color': fillColorExpr,
+            'fill-outline-color': lineColorExpr,
+            'fill-opacity': fillOpacityExpr,
           },
         });
+      }
+      if (this._map.getLayer(POI_LAYER_POLYGON_FILL)) {
+        this._map.setPaintProperty(POI_LAYER_POLYGON_FILL, 'fill-color', fillColorExpr);
+        this._map.setPaintProperty(POI_LAYER_POLYGON_FILL, 'fill-outline-color', lineColorExpr);
+        this._map.setPaintProperty(POI_LAYER_POLYGON_FILL, 'fill-opacity', fillOpacityExpr);
       }
       if (!this._map.getLayer(POI_LAYER_POLYGON_HOVER_OUTLINE)) {
         this._map.addLayer({
@@ -1659,9 +1712,16 @@ class Drawer implements maplibregl.IControl {
           layout: { 'line-cap': 'round', 'line-join': 'round' },
           paint: {
             'line-color': '#ffffff',
-            'line-width': polygonBorderWidth + 4,
+            'line-width': ['+', lineWidthExpr, 4],
           },
         });
+      }
+      if (this._map.getLayer(POI_LAYER_POLYGON_HOVER_OUTLINE)) {
+        this._map.setPaintProperty(POI_LAYER_POLYGON_HOVER_OUTLINE, 'line-width', [
+          '+',
+          lineWidthExpr,
+          4,
+        ]);
       }
       if (!this._map.getLayer(POI_LAYER_POLYGON_HOVER_MAIN)) {
         this._map.addLayer({
@@ -1671,10 +1731,18 @@ class Drawer implements maplibregl.IControl {
           filter: ['all', ['==', '$type', 'Polygon'], ['==', POI_HOVER_ID_PROPERTY, '__none__']],
           layout: { 'line-cap': 'round', 'line-join': 'round' },
           paint: {
-            'line-color': polygonColor,
-            'line-width': polygonBorderWidth + 2,
+            'line-color': lineColorExpr,
+            'line-width': ['+', lineWidthExpr, 2],
           },
         });
+      }
+      if (this._map.getLayer(POI_LAYER_POLYGON_HOVER_MAIN)) {
+        this._map.setPaintProperty(POI_LAYER_POLYGON_HOVER_MAIN, 'line-color', lineColorExpr);
+        this._map.setPaintProperty(POI_LAYER_POLYGON_HOVER_MAIN, 'line-width', [
+          '+',
+          lineWidthExpr,
+          2,
+        ]);
       }
       if (!this._map.getLayer(POI_LAYER_POLYGON_LINE)) {
         this._map.addLayer({
@@ -1684,10 +1752,14 @@ class Drawer implements maplibregl.IControl {
           filter: ['==', '$type', 'Polygon'],
           layout: { 'line-cap': 'round', 'line-join': 'round' },
           paint: {
-            'line-color': polygonColor,
-            'line-width': polygonBorderWidth,
+            'line-color': lineColorExpr,
+            'line-width': lineWidthExpr,
           },
         });
+      }
+      if (this._map.getLayer(POI_LAYER_POLYGON_LINE)) {
+        this._map.setPaintProperty(POI_LAYER_POLYGON_LINE, 'line-color', lineColorExpr);
+        this._map.setPaintProperty(POI_LAYER_POLYGON_LINE, 'line-width', lineWidthExpr);
       }
       if (!this._map.getLayer(POI_LAYER_LINE_HOVER_OUTLINE)) {
         this._map.addLayer({
@@ -1698,9 +1770,16 @@ class Drawer implements maplibregl.IControl {
           layout: { 'line-cap': 'round', 'line-join': 'round' },
           paint: {
             'line-color': '#ffffff',
-            'line-width': polygonBorderWidth + 4,
+            'line-width': ['+', lineWidthExpr, 4],
           },
         });
+      }
+      if (this._map.getLayer(POI_LAYER_LINE_HOVER_OUTLINE)) {
+        this._map.setPaintProperty(POI_LAYER_LINE_HOVER_OUTLINE, 'line-width', [
+          '+',
+          lineWidthExpr,
+          4,
+        ]);
       }
       if (!this._map.getLayer(POI_LAYER_LINE_HOVER_MAIN)) {
         this._map.addLayer({
@@ -1710,10 +1789,18 @@ class Drawer implements maplibregl.IControl {
           filter: ['all', ['==', '$type', 'LineString'], ['==', POI_HOVER_ID_PROPERTY, '__none__']],
           layout: { 'line-cap': 'round', 'line-join': 'round' },
           paint: {
-            'line-color': polygonColor,
-            'line-width': polygonBorderWidth + 2,
+            'line-color': lineColorExpr,
+            'line-width': ['+', lineWidthExpr, 2],
           },
         });
+      }
+      if (this._map.getLayer(POI_LAYER_LINE_HOVER_MAIN)) {
+        this._map.setPaintProperty(POI_LAYER_LINE_HOVER_MAIN, 'line-color', lineColorExpr);
+        this._map.setPaintProperty(POI_LAYER_LINE_HOVER_MAIN, 'line-width', [
+          '+',
+          lineWidthExpr,
+          2,
+        ]);
       }
       if (!this._map.getLayer(POI_LAYER_LINE)) {
         this._map.addLayer({
@@ -1723,10 +1810,14 @@ class Drawer implements maplibregl.IControl {
           filter: ['==', '$type', 'LineString'],
           layout: { 'line-cap': 'round', 'line-join': 'round' },
           paint: {
-            'line-color': polygonColor,
-            'line-width': polygonBorderWidth,
+            'line-color': lineColorExpr,
+            'line-width': lineWidthExpr,
           },
         });
+      }
+      if (this._map.getLayer(POI_LAYER_LINE)) {
+        this._map.setPaintProperty(POI_LAYER_LINE, 'line-color', lineColorExpr);
+        this._map.setPaintProperty(POI_LAYER_LINE, 'line-width', lineWidthExpr);
       }
       if (!this._map.getLayer(POI_LAYER_POINT_HOVER_OUTLINE)) {
         this._map.addLayer({
@@ -1735,10 +1826,17 @@ class Drawer implements maplibregl.IControl {
           source: POI_SOURCE_ID,
           filter: ['all', ['==', '$type', 'Point'], ['==', POI_HOVER_ID_PROPERTY, '__none__']],
           paint: {
-            'circle-radius': 9,
+            'circle-radius': ['+', pointRadiusExpr, 4],
             'circle-color': '#ffffff',
           },
         });
+      }
+      if (this._map.getLayer(POI_LAYER_POINT_HOVER_OUTLINE)) {
+        this._map.setPaintProperty(POI_LAYER_POINT_HOVER_OUTLINE, 'circle-radius', [
+          '+',
+          pointRadiusExpr,
+          4,
+        ]);
       }
       if (!this._map.getLayer(POI_LAYER_POINT_HOVER_MAIN)) {
         this._map.addLayer({
@@ -1747,10 +1845,18 @@ class Drawer implements maplibregl.IControl {
           source: POI_SOURCE_ID,
           filter: ['all', ['==', '$type', 'Point'], ['==', POI_HOVER_ID_PROPERTY, '__none__']],
           paint: {
-            'circle-radius': 7,
-            'circle-color': polygonColor,
+            'circle-radius': ['+', pointRadiusExpr, 2],
+            'circle-color': lineColorExpr,
           },
         });
+      }
+      if (this._map.getLayer(POI_LAYER_POINT_HOVER_MAIN)) {
+        this._map.setPaintProperty(POI_LAYER_POINT_HOVER_MAIN, 'circle-color', lineColorExpr);
+        this._map.setPaintProperty(POI_LAYER_POINT_HOVER_MAIN, 'circle-radius', [
+          '+',
+          pointRadiusExpr,
+          2,
+        ]);
       }
       if (!this._map.getLayer(POI_LAYER_POINT)) {
         this._map.addLayer({
@@ -1759,12 +1865,16 @@ class Drawer implements maplibregl.IControl {
           source: POI_SOURCE_ID,
           filter: ['==', '$type', 'Point'],
           paint: {
-            'circle-radius': 5,
-            'circle-color': polygonColor,
+            'circle-radius': pointRadiusExpr,
+            'circle-color': lineColorExpr,
             'circle-stroke-width': 1,
             'circle-stroke-color': '#fff',
           },
         });
+      }
+      if (this._map.getLayer(POI_LAYER_POINT)) {
+        this._map.setPaintProperty(POI_LAYER_POINT, 'circle-color', lineColorExpr);
+        this._map.setPaintProperty(POI_LAYER_POINT, 'circle-radius', pointRadiusExpr);
       }
 
       if (!this._map.getLayer(MEASURE_VERTEX_CIRCLE_LAYER_ID)) {

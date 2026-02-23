@@ -62,7 +62,7 @@ class MAPTORIUMROUTES {
    * Get points for specific route
    * @param ID - Route ID from RouteList, default is 0 - current route
    */
-  public async points(routeID: number = 0): Promise<Array<GPSCoords> | false> {
+  public async Points(routeID: number = 0): Promise<Array<GPSCoords> | false> {
     const historyStore = useRouteHistoryStore();
 
     if (routeID > 0 && historyStore.isVisible(routeID)) {
@@ -102,7 +102,7 @@ class MAPTORIUMROUTES {
 
   public show() {
     this.onMap.value = true;
-    this.points().catch((e) => {
+    this.Points().catch((e) => {
       console.error(e.message);
     });
   }

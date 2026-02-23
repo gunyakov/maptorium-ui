@@ -111,6 +111,7 @@ export enum TileInCache {
 }
 
 export enum GPSType {
-  tcp = 'TCP',
-  usb = 'USB',
+  usb = 'usb',
+  tcp = 'tcp',
+  httpFOS = 'httpFOS',
 }

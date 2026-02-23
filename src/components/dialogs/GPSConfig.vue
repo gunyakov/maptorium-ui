@@ -10,12 +10,24 @@
           emit-value
           map-options
         />
-        <template v-if="GPS.data.value.type == GPSType.tcp">
+        <template v-if="GPS.data.value.type == GPSType.tcp || GPS.data.value.type == GPSType.httpFOS">
           <q-input v-model="GPS.data.value.host" :label="t('dialog.gps.config.host')" />
           <q-input v-model="GPS.data.value.port" :label="t('dialog.gps.config.port')" />
         </template>
         <template v-else-if="GPS.data.value.type == GPSType.usb">
-          <q-input v-model="GPS.data.value.device" :label="t('dialog.gps.config.device')" />
+          <div v-if="GPS.usbLoading.value" class="row justify-center q-pa-md">
+            <q-spinner color="primary" size="42px" />
+          </div>
+          <q-select
+            v-else
+            v-model="GPS.data.value.device"
+            :options="GPS.USBDevList.value"
+            :option-label="'title'"
+            :option-value="'value'"
+            :label="t('dialog.gps.config.device')"
+            emit-value
+            map-options
+          />
         </template>
       </q-card-section>
       <q-card-actions align="right">
@@ -42,7 +54,12 @@ const props = defineProps<{
 const dialogTitle = computed(() => t(`dialog.${props.modalName}.title`));
 const gpsTypeOptions = computed(() =>
   GPS.options.map((type) => ({
-    label: type === GPSType.tcp ? t('txt.gps.type.tcp') : t('txt.gps.type.usb'),
+    label:
+      type === GPSType.tcp
+        ? t('txt.gps.type.tcp')
+        : type === GPSType.httpFOS
+        ? t('txt.gps.type.httpFOS')
+        : t('txt.gps.type.usb'),
     value: type,
   })),
 );

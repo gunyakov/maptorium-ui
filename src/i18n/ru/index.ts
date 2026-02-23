@@ -13,6 +13,11 @@ export default {
       },
       start: {
         success: 'Задача запущена.',
+        cached_map: {
+          title: 'Прогресс кеширования тайлов',
+          progress: 'Обработано {checked} из {total}',
+          hide: 'Скрыть',
+        },
       },
       stop: {
         success: 'Задача остановлена.',
@@ -75,6 +80,7 @@ export default {
       cached: {
         poi_id_invalid: 'Невозможно прочитать POI ID. Отмена расчёта тайлов.',
         zoom_invalid: 'Ошибка чтения значения зума. Отмена расчёта тайлов.',
+        polygon_invalid: 'Некорректный полигон. Отмена расчёта тайлов.',
         map_handler_missing:
           'Невозможно получить обработчик карты по map ID. Отмена расчёта тайлов.',
         poi_not_found: 'Невозможно найти POI в БД. Отмена расчёта тайлов.',
@@ -147,6 +153,7 @@ export default {
     view: {
       root: 'Вид',
       dark_mode: 'Тёмный режим',
+      map_mode: 'Режим глобуса',
       tile_grid: 'Сетка тайлов',
       clear_tile_grid: 'Убрать сетку тайлов',
       poi_manager: 'POI менеджер',
@@ -181,6 +188,7 @@ export default {
         edit: 'Редактировать',
         delete: 'Удалить',
         download: 'Скачать...',
+        cached_map: 'Карта кеша...',
       },
       measure: {
         title: 'Измерения',
@@ -243,11 +251,17 @@ export default {
         down: 'Вниз',
       },
     },
+    cached_map: {
+      title: 'Прогресс кеширования тайлов',
+      progress: 'Обработано {checked} из {total}',
+      hide: 'Скрыть',
+    },
     gps: {
       type: {
         label: 'Тип GPS',
         tcp: 'TCP',
         usb: 'USB',
+        httpFOS: 'HTTP FOS',
       },
       sample_time: 'Введите время выборки GPS, сек:',
       info: {
@@ -298,6 +312,13 @@ export default {
     actions: {
       ok: 'ОК',
       cancel: 'Отмена',
+    },
+    cached_map: {
+      main: {
+        title: 'Карта кешированных тайлов',
+        map: 'Карта',
+        zoom: 'Масштаб',
+      },
     },
     gps: {
       config: {
@@ -370,14 +391,13 @@ export default {
         select_folder_to_rename: 'Выберите папку для переименования.',
       },
     },
-    cached_map: {
-      main: {
-        title: 'Карта кешированных тайлов',
-      },
-    },
     poi: {
       properties: {
         title: 'Свойства POI',
+        color: 'Цвет',
+        width: 'Толщина линии',
+        fill_color: 'Цвет заливки',
+        fill_opacity: 'Прозрачность заливки',
       },
     },
     category: {

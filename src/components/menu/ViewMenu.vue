@@ -14,6 +14,17 @@
             />
           </q-item-section>
         </q-item>
+        <q-item clickable @click="toggleMapMode()">
+          <q-item-section>{{ $t('menu.view.map_mode') }}</q-item-section>
+          <q-item-section side>
+            <q-toggle
+              :model-value="settings.globe"
+              dense
+              @update:model-value="setMapMode"
+              @click.stop
+            />
+          </q-item-section>
+        </q-item>
         <q-separator />
         <q-item clickable v-close-popup @click="togglePOIManager()">
           <q-item-section>{{ $t('menu.view.poi_manager') }}</q-item-section>
@@ -88,6 +99,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import TileGrid from 'src/map/TileGrid';
+import { getMap } from 'src/map/Map';
 import { useSettingsStore } from 'src/stores/settings';
 
 const gridOffsets = ['0', ...Array.from({ length: 7 }, (_, index) => `+${index + 1}`)];
@@ -133,6 +145,18 @@ function toggleDarkMode() {
 
 function setDarkMode(value: boolean) {
   settings.set_darkMode(value);
+}
+
+function toggleMapMode() {
+  settings.set_globe(!settings.globe);
+  const map = getMap();
+  map.updateProjection();
+}
+
+function setMapMode(value: boolean) {
+  settings.set_globe(value);
+  const map = getMap();
+  map.updateProjection();
 }
 </script>
 

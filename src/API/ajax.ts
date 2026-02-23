@@ -43,6 +43,7 @@ const urlList = {
   'gps.routenew': '/gps/routenew',
   'gps.route': '/gps/route',
   'gps.list': '/gps/list',
+  'cached.poi': '/map/cached/poi',
   'poi:full_list': '/poi',
 };
 

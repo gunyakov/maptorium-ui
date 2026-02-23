@@ -10,41 +10,59 @@ import { ref, watch } from 'vue';
 //Composable for managing GPS configuration
 //--------------------------------------------------------------------------
 const options = Object.values(GPSType);
-let USBDevList: Array<SelectItem> = [];
+const USBDevList: Ref<Array<SelectItem>> = ref([]);
+const usbLoading = ref(false);
 const data: Ref<{ type: GPSType; host: string; port: number; device: string }> = ref({
   type: GPSType.tcp,
   host: '127.0.0.1',
   port: 9010,
   device: 'COM1',
 });
+const run: Ref<boolean> = ref(false);
+const record: Ref<boolean> = ref(false);
+const center: Ref<boolean> = ref(false);
 export const useGPS = () => {
-  watch(
-    () => data.value.type,
-    (newType: GPSType) => {
-      if (newType === GPSType.usb) {
-        makeUSBDevList().catch((e) => console.error(e?.message));
-      }
-    },
-    { deep: true },
-  );
   const makeUSBDevList = async () => {
-    const rawUSBList = (await request('gps.list', {}, 'get')) as Array<USBDevice> | false;
-    if (rawUSBList) {
-      USBDevList = [];
-      rawUSBList.forEach((valueL) => {
-        if (valueL.manufacturer && valueL.path)
-          USBDevList.push({
-            title: valueL.friendlyName || valueL.manufacturer,
-            value: valueL.path,
-          });
-      });
+    usbLoading.value = true;
+    try {
+      const rawUSBList = (await request('gps.list', {}, 'get')) as Array<USBDevice> | false;
+      USBDevList.value = [];
+      if (rawUSBList) {
+        rawUSBList.forEach((valueL) => {
+          if (valueL.path) {
+            USBDevList.value.push({
+              title: valueL.friendlyName || valueL.manufacturer || valueL.path,
+              value: valueL.path,
+            });
+          }
+        });
+        data.value.device = rawUSBList[0]?.path || '';
+      }
+    } catch (e) {
+      console.error((e as Error)?.message);
+    } finally {
+      usbLoading.value = false;
     }
   };
+
+  watch(
+    () => data.value.type,
+    async (newType: GPSType) => {
+      if (newType === GPSType.usb) {
+        await makeUSBDevList();
+      }
+    },
+    { deep: true, immediate: true },
+  );
   return {
     makeUSBDevList,
     USBDevList,
+    usbLoading,
     data,
     options,
+    run,
+    record,
+    center,
   };
 };
 //-------------------------------------------------------------------------

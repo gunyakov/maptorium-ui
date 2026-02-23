@@ -32,14 +32,14 @@ const prompt = usePrompt();
 import { ModalsList, useDialogs } from 'src/composables/useDialogs';
 const dialogs = useDialogs();
 import { usePOIStore } from 'src/stores/poi';
+import { useGPS } from 'src/composables/useGPS';
+const gps = useGPS();
 //----------------------------------------------------------------------------------------------------------------------
 //MAPTORIUM CLASS to handle GPS events and control GPS service on server
 //----------------------------------------------------------------------------------------------------------------------
 class MAPTORIUMGPS {
   private _lastCoords: GPSCoords = { lat: 0, lng: 0, dir: 0 };
-  public readonly run: Ref<boolean> = ref(false);
-  public readonly record: Ref<boolean> = ref(false);
-  public center: Ref<boolean> = ref(false);
+
   public _distanceToGo: number = 0;
   public _distanceRun: number = 0;
   public distanceRun: Ref<number> = ref(0);
@@ -113,7 +113,7 @@ class MAPTORIUMGPS {
       if (this._speedLog.length > 100) this._speedLog.shift();
       if (dir) this._lastCoords.dir = dir;
       this._fire(GPSEvents.update, lat, lng, dir);
-      if (this.center.value) this._fire(GPSEvents.center, lat, lng);
+      if (gps.center.value) this._fire(GPSEvents.center, lat, lng);
       if (this._points.length > 2) {
         const lastPoint = this._points[this._points.length - 1];
         if (lastPoint) {
@@ -180,8 +180,8 @@ class MAPTORIUMGPS {
    * Start server GPS service
    */
   public async start(): Promise<void> {
-    if (await request<boolean>('gps.start', {}, 'get', true)) this.run.value = true;
-    else this.run.value = false;
+    if (await request<boolean>('gps.start', {}, 'get', true)) gps.run.value = true;
+    else gps.run.value = false;
   }
 
   /**
@@ -189,24 +189,24 @@ class MAPTORIUMGPS {
    */
   public async stop(): Promise<void> {
     if (await request<boolean>('gps.stop', {}, 'get', true)) {
-      this.run.value = false;
+      gps.run.value = false;
     }
   }
   /**
    * Toggle record GPS route
    */
   public async toggleRecord(): Promise<void> {
-    if (this.record.value) {
-      if (await request<boolean>('gps.stoprecord', {}, 'get', true)) this.record.value = false;
+    if (gps.record.value) {
+      if (await request<boolean>('gps.stoprecord', {}, 'get', true)) gps.record.value = false;
     } else {
-      if (await request<boolean>('gps.startrecord', {}, 'get', true)) this.record.value = true;
+      if (await request<boolean>('gps.startrecord', {}, 'get', true)) gps.record.value = true;
     }
   }
   /**
    * Toggle server GPS service
    */
   public async toggle(): Promise<void> {
-    if (this.run.value) await this.stop();
+    if (gps.run.value) await this.stop();
     else await this.start();
   }
   /**

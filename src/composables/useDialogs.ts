@@ -6,6 +6,7 @@ import POIMove from 'src/components/dialogs/POIMove.vue';
 import Job from 'src/components/dialogs/Job.vue';
 import POIProperties from 'src/components/dialogs/POIProperties.vue';
 import FileSystemTree from 'src/components/dialogs/FileSystemTree.vue';
+import CachedMap from 'src/components/dialogs/CachedMap.vue';
 import type { Component } from 'vue';
 
 export enum ModalsList {
@@ -29,7 +30,7 @@ interface ModalConfig {
 const modalRegistry: Record<ModalsList, ModalConfig> = {
   [ModalsList.POIConfig]: { component: POIProperties },
   [ModalsList.CategoryConfig]: { component: GPSConfig },
-  [ModalsList.CachedMap]: { component: GPSConfig },
+  [ModalsList.CachedMap]: { component: CachedMap },
   [ModalsList.DistanceToGO]: { component: DistanceToGO },
   [ModalsList.GPSConfig]: { component: GPSConfig },
   [ModalsList.GPSRouteFromFile]: { component: GPSRouteFromFile },

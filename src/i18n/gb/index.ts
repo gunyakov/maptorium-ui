@@ -73,6 +73,7 @@ export default {
       cached: {
         poi_id_invalid: 'Can’t read POI ID. Abort tile calculation.',
         zoom_invalid: 'Error reading zoom value. Abort tile calculation.',
+        polygon_invalid: 'Polygon is invalid. Abort tile calculation.',
         map_handler_missing: 'Can’t get map handler by map ID. Abort tile calculation.',
         poi_not_found: 'Can’t find POI in DB. Abort tile calculation.',
         poi_not_polygon: 'Abort tile calculation. POI type is not Polygon.',
@@ -143,6 +144,7 @@ export default {
     view: {
       root: 'View',
       dark_mode: 'Dark mode',
+      map_mode: 'Globe mode',
       tile_grid: 'Tile Grid',
       clear_tile_grid: 'Remove Tile Grid',
       poi_manager: 'POI Manager',
@@ -176,6 +178,7 @@ export default {
         edit: 'Edit',
         delete: 'Delete',
         download: 'Download...',
+        cached_map: 'Cached map...',
       },
       measure: {
         title: 'Measure',
@@ -237,11 +240,17 @@ export default {
         down: 'Down',
       },
     },
+    cached_map: {
+      title: 'Cached map progress',
+      progress: 'Checked {checked} of {total}',
+      hide: 'Hide',
+    },
     gps: {
       type: {
         label: 'GPS Type',
         tcp: 'TCP',
         usb: 'USB',
+        httpFOS: 'HTTP FOS',
       },
       sample_time: 'Enter GPS sample time, sec:',
       info: {
@@ -292,6 +301,13 @@ export default {
     actions: {
       ok: 'OK',
       cancel: 'Cancel',
+    },
+    cached_map: {
+      main: {
+        title: 'Tiles cached map',
+        map: 'Map',
+        zoom: 'Zoom',
+      },
     },
     gps: {
       config: {
@@ -364,14 +380,13 @@ export default {
         select_folder_to_rename: 'Select folder to rename.',
       },
     },
-    cached_map: {
-      main: {
-        title: 'Tiles cached map',
-      },
-    },
     poi: {
       properties: {
         title: 'POI Properties',
+        color: 'Color',
+        width: 'Width',
+        fill_color: 'Fill color',
+        fill_opacity: 'Fill opacity',
       },
     },
     category: {

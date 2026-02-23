@@ -58,5 +58,6 @@ declare module 'maplibre-gl' {
   export type FilterSpecification = maplibregl.FilterSpecification;
   export type FogSpecification = maplibregl.FogSpecification;
   export type AnySourceData = maplibregl.AnySourceData;
+  export type GeoJSONSource = maplibregl.GeoJSONSource;
   export type SourceQueryOptions = maplibregl.SourceQueryOptions;
 }
