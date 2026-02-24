@@ -1,16 +1,16 @@
 <template>
   <q-layout view="hHh lpr fFf" class="shadow-2 rounded-borders">
     <q-header elevated>
-      <q-bar>
-        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleJobManagerDrawer" />
+      <q-bar class="q-electron-drag">
+        <q-icon name="img:icons/favicon-32x32.png" />
 
         <div>Maptorium</div>
 
         <q-space />
 
-        <q-btn dense flat icon="minimize" />
-        <q-btn dense flat icon="crop_square" />
-        <q-btn dense flat icon="close" />
+        <q-btn dense flat icon="minimize" @click="minimize()" />
+        <q-btn dense flat icon="crop_square" @click="toggleMaximize()" />
+        <q-btn dense flat icon="close" @click="closeApp()" />
       </q-bar>
       <TopBarMenuComponent />
     </q-header>
@@ -37,6 +37,19 @@ import JobManager from 'src/components/JobManager.vue';
 import TopBarMenuComponent from 'src/components/TopBarMenuComponent.vue';
 import { useSettingsStore } from 'src/stores/settings';
 import { getMap } from 'src/map/Map';
+import { useWindowControls } from 'src/composables/useWindowControl';
+
+const { minimize, toggleMaximize, closeApp } = useWindowControls();
+
+declare global {
+  interface Window {
+    appControls?: {
+      minimize: () => void;
+      toggleMaximize: () => void;
+      close: () => void;
+    };
+  }
+}
 
 const settingsStore = useSettingsStore();
 
@@ -69,8 +82,4 @@ function resizeMapAfterDrawerChange() {
 watch([jobManagerOpen, poiManagerOpen], () => {
   resizeMapAfterDrawerChange();
 });
-
-function toggleJobManagerDrawer() {
-  jobManagerOpen.value = !jobManagerOpen.value;
-}
 </script>

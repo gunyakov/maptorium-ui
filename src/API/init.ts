@@ -3,6 +3,7 @@ import request from './ajax';
 import { useNetworkMode } from 'src/composables/useNetworkMode';
 import { useGPS } from 'src/composables/useGPS';
 import { DownloadMode, GPSType } from 'src/enum';
+
 export default async function init() {
   // Placeholder for any initialization logic needed for the API module
   // For example, you could set up default headers, base URL, or perform a test request to ensure connectivity

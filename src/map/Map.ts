@@ -131,6 +131,43 @@ class MaptoriumMap {
     return this._map;
   }
 
+  /**
+   * Force maplibre instance to reinitialize.
+   */
+  public forceReload() {
+    if (this._map) {
+      this.destroyRouteHistoryHover();
+      const currentMap = this._map;
+      const container = currentMap.getContainer();
+      const safeRemoveControl = (control: maplibregl.IControl, label: string) => {
+        try {
+          currentMap.removeControl(control);
+        } catch (error) {
+          console.warn(`Failed to remove ${label} control`, error);
+        }
+      };
+      safeRemoveControl(layerManipulator, 'layer manipulator');
+      safeRemoveControl(drawer, 'drawer');
+      safeRemoveControl(TileGrid, 'tile grid');
+      safeRemoveControl(CachedMap, 'cached map');
+      try {
+        currentMap.remove();
+      } catch (error) {
+        console.warn('Failed to remove map instance cleanly', error);
+        if (container) {
+          while (container.firstChild) {
+            container.removeChild(container.firstChild);
+          }
+        }
+      } finally {
+        this._map = null;
+        this._mapMoveCount = 0;
+      }
+    }
+    this.init();
+    this.initRouteHistoryHover();
+  }
+
   public updateProjection() {
     if (!this._map) return;
     const settings = useSettingsStore();

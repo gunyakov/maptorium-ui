@@ -1,5 +1,12 @@
 # maptorium-ui Changelog
 
+## 4.0.0 (2026-02-25)
+
+### ✨ Features
+
+- Rebuilt the entire UI with Quasar to align with the new Electron-first desktop workflow.
+- Persist POI data on the client side for offline availability and faster edits.
+
 ## 3.2.0 (2025-07-26)
 
 ### 🔧 Workflow

@@ -1,41 +1,47 @@
-# Maptorium-UI
+# Maptorium UI
 
-Web UI for maptorium-server. For development purposes on VUE 3.4
+Maptorium UI is now a Quasar-powered interface that ships ready for Electron. This repository builds only the desktop UI package; it does not build or bundle the Node.js server. If you need the full server + UI distribution visit https://github.com/gunyakov/maptorium-server.
 
-If you looking `ready for use` code without any installation and compilation, pls visit main repo release section for maptorium-server. Inside release section you will find archive with maptorium server and UI compiled for use. Windows version for one click run also available.
+## Highlights
 
-## Recommended IDE Setup
+- Built with Quasar 2, Vue 3, and Pinia for a modern navigation UI.
+- Electron-ready out of the box for offline desktop deployments.
+- Local POI persistence, socket client for live vessel data, and configurable basemaps.
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Requirements
 
-## Type Support for `.vue` Imports in TS
+- Node.js 20 or newer (see `package.json` for the full list of supported LTS releases).
+- npm 9+ (or another package manager of your choice).
+- The Quasar CLI is installed automatically through `@quasar/app-vite` during `npm install`.
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
+## Installation
 
 ```sh
+git clone https://github.com/gunyakov/maptorium-ui.git
+cd maptorium-ui
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+## Development
 
-```sh
-npm run dev
-```
+- `npm run dev` – starts the Quasar Vite dev server at http://localhost:9000 with hot module reload.
+- `npm run dev:electron` – launches the UI inside Electron for desktop testing while retaining hot reload.
 
-### Type-Check, Compile and Minify for Production
+## Production Builds
 
-```sh
-npm run build
-```
+- `npm run build` – produces a static SPA build under `dist/spa` that can be served by maptorium-server or any web server.
+- `npm run build:electron` – packages an Electron desktop app under `dist/electron`, ready for distribution.
+- `npm run lint` – runs ESLint on Vue, TypeScript, and JavaScript sources.
 
-### Lint with [ESLint](https://eslint.org/)
+## Electron Distribution Scope
 
-```sh
-npm run lint
-```
+This repository controls only the UI and the Electron packaging artifacts (AppImage, dmg, exe, etc.). Back-end services, GPS ingestion, and bundled installers containing both the server and UI live in the main project repository: https://github.com/gunyakov/maptorium-server.
+
+## Recommended Tooling
+
+- VS Code + Volar (disable Vetur) for Vue single-file component DX.
+- Vue TSC or the `npm run lint` script for type checking.
+
+## Need the Server?
+
+Head over to https://github.com/gunyakov/maptorium-server for deployment guides, API docs, and combined server+UI release artifacts.

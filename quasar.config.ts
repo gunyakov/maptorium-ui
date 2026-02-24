@@ -33,7 +33,7 @@ export default defineConfig((ctx) => {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
     build: {
-      distDir: process.env.QUASAR_DIST_DIR || 'dist/spa',
+      distDir: '../maptorium-server-build/public_html',
 
       target: {
         browser: ['es2022', 'firefox115', 'chrome115', 'safari14'],
@@ -161,7 +161,7 @@ export default defineConfig((ctx) => {
       // directives: [],
 
       // Quasar plugins
-      plugins: ['Dialog', 'Notify'],
+      plugins: ['Dialog', 'Notify', 'Loading'],
     },
 
     // animations: 'all', // --- includes all animations
@@ -241,7 +241,7 @@ export default defineConfig((ctx) => {
       // specify the debugging port to use for the Electron app when running in development mode
       inspectPort: 5858,
 
-      bundler: 'packager', // 'packager' or 'builder'
+      bundler: 'builder', // 'packager' or 'builder'
 
       packager: {
         // https://github.com/electron-userland/electron-packager/blob/master/docs/api.md#options
@@ -258,6 +258,11 @@ export default defineConfig((ctx) => {
         // https://www.electron.build/configuration/configuration
 
         appId: 'maptorium-ui',
+        productName: 'MaptoriumUI',
+        linux: {
+          target: ['AppImage'],
+          icon: 'src-electron/icons',
+        },
       },
     },
 

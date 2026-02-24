@@ -137,6 +137,11 @@ export default {
       updated: 'Storage path updated.',
       save_failed: 'Unable to save map storage path.',
     },
+    poi_backup: {
+      export_done: 'POI backup was exported.',
+      import_done: 'POI backup was imported.',
+      invalid_file: 'Backup file is invalid.',
+    },
   },
   menu: {
     maps: 'Maps',
@@ -214,6 +219,11 @@ export default {
       preferences: {
         root: 'Preferences',
         language: 'Language',
+        backup: {
+          root: 'Bakup',
+          export: 'Export',
+          import: 'Import...',
+        },
         network_mode: {
           root: 'Network Mode',
           enable: 'Enable',
@@ -223,6 +233,7 @@ export default {
         gb: 'English',
         ru: 'Russian',
       },
+      forceReload: 'Force reload map',
       quit: 'Quit',
     },
   },
@@ -296,6 +307,9 @@ export default {
         no_last_point: 'Cant get last route point. Result is empty now.',
       },
     },
+    preLoader: 'Awaiting server connection...',
+    initializing: 'Initializing...',
+    wait_exiting_app: 'Please wait, exiting app...',
   },
   dialog: {
     actions: {
@@ -381,6 +395,20 @@ export default {
       },
     },
     poi: {
+      backup: {
+        import: {
+          title: 'Import POI backup',
+          file_label: 'Backup file',
+          hint: 'Select .mpb or .json backup file',
+        },
+        conflict: {
+          title: 'Rewrite POI?',
+          message: 'POI "{name}" already exists. Rewrite POI?',
+          apply_for_all: 'Apply for all other POI',
+          skip: 'Skip',
+          rewrite: 'Rewrite',
+        },
+      },
       properties: {
         title: 'POI Properties',
         color: 'Color',

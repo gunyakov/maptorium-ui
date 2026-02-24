@@ -3,11 +3,8 @@
     {{ $t('menu.file.root') }}
     <q-menu>
       <q-list dense style="min-width: 100px">
-        <q-item clickable v-close-popup>
-          <q-item-section>Open...</q-item-section>
-        </q-item>
-        <q-item clickable v-close-popup>
-          <q-item-section>New</q-item-section>
+        <q-item clickable v-close-popup @click="forceReloadMap">
+          <q-item-section>{{ $t('menu.file.forceReload') }}</q-item-section>
         </q-item>
 
         <q-separator />
@@ -22,7 +19,7 @@
 
         <q-separator />
 
-        <q-item clickable v-close-popup>
+        <q-item clickable v-close-popup @click="closeApp">
           <q-item-section>{{ $t('menu.file.quit') }}</q-item-section>
         </q-item>
       </q-list>
@@ -31,4 +28,20 @@
 </template>
 <script setup lang="ts">
 import PreferencesMenu from './preferences/indexPref.vue';
+import { useWindowControls } from 'src/composables/useWindowControl';
+import { getMap } from 'src/map/Map';
+import Alerts from 'src/alerts';
+const { closeApp } = useWindowControls();
+
+const forceReloadMap = () => {
+  Alerts.showLoading('txt.initializing');
+  try {
+    const Map = getMap();
+    Map.forceReload();
+  } catch (error) {
+    console.error('Failed to force reload map', error);
+  } finally {
+    Alerts.hideLoading();
+  }
+};
 </script>

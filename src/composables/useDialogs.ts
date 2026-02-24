@@ -7,6 +7,8 @@ import Job from 'src/components/dialogs/Job.vue';
 import POIProperties from 'src/components/dialogs/POIProperties.vue';
 import FileSystemTree from 'src/components/dialogs/FileSystemTree.vue';
 import CachedMap from 'src/components/dialogs/CachedMap.vue';
+import POIBackupImportFile from 'src/components/dialogs/POIBackupImportFile.vue';
+import POIBackupConflict from 'src/components/dialogs/POIBackupConflict.vue';
 import type { Component } from 'vue';
 
 export enum ModalsList {
@@ -17,6 +19,8 @@ export enum ModalsList {
   GPSConfig = 'gps.config',
   GPSRouteFromFile = 'gps.route_from_file',
   POIMove = 'poi.move',
+  POIBackupImportFile = 'poi.backup.import',
+  POIBackupConflict = 'poi.backup.conflict',
   Job = 'job.main',
   FileTree = 'filesystem_tree',
 }
@@ -35,6 +39,8 @@ const modalRegistry: Record<ModalsList, ModalConfig> = {
   [ModalsList.GPSConfig]: { component: GPSConfig },
   [ModalsList.GPSRouteFromFile]: { component: GPSRouteFromFile },
   [ModalsList.POIMove]: { component: POIMove },
+  [ModalsList.POIBackupImportFile]: { component: POIBackupImportFile },
+  [ModalsList.POIBackupConflict]: { component: POIBackupConflict },
   [ModalsList.Job]: { component: Job },
   [ModalsList.FileTree]: { component: FileSystemTree },
 };

@@ -37,10 +37,20 @@
         <SquareUnitsMenu />
       </q-item>
       <!--End Square Units menu with sub menu-->
+      <!--Start Backup menu with sub menu-->
+      <q-item clickable dense>
+        <q-item-section>{{ $t('menu.file.preferences.backup.root') }}</q-item-section>
+        <q-item-section side>
+          <q-icon name="keyboard_arrow_right" />
+        </q-item-section>
+        <BackupMenu />
+      </q-item>
+      <!--End Backup menu with sub menu-->
     </q-list>
   </q-menu>
 </template>
 <script setup lang="ts">
+import BackupMenu from './BackupMenu.vue';
 import LanguageMenu from './LanguageMenu.vue';
 import NetworkModeMenu from './NetworkModeMenu.vue';
 import SquareUnitsMenu from './SquareUnitsMenu.vue';

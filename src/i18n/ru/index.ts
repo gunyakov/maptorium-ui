@@ -146,6 +146,11 @@ export default {
       updated: 'Путь хранения обновлён.',
       save_failed: 'Не удалось сохранить путь хранения карты.',
     },
+    poi_backup: {
+      export_done: 'Резервная копия POI экспортирована.',
+      import_done: 'Резервная копия POI импортирована.',
+      invalid_file: 'Файл резервной копии некорректный.',
+    },
   },
   menu: {
     maps: 'Карты',
@@ -225,6 +230,11 @@ export default {
       preferences: {
         root: 'Настройки',
         language: 'Язык',
+        backup: {
+          root: 'Резервная копия POI',
+          export: 'Экспорт',
+          import: 'Импорт...',
+        },
         network_mode: {
           root: 'Режим сети',
           enable: 'Включить',
@@ -234,6 +244,7 @@ export default {
         gb: 'Английский',
         ru: 'Русский',
       },
+      forceReload: 'Перезагрузить карту',
       quit: 'Выйти',
     },
   },
@@ -307,6 +318,9 @@ export default {
         no_last_point: 'Невозможно получить последнюю точку маршрута. Результат пуст.',
       },
     },
+    preLoader: 'Ожидание подключения к серверу...',
+    initializing: 'Инициализация...',
+    wait_exiting_app: 'Выход из приложения...',
   },
   dialog: {
     actions: {
@@ -392,6 +406,20 @@ export default {
       },
     },
     poi: {
+      backup: {
+        import: {
+          title: 'Импорт резервной копии POI',
+          file_label: 'Файл резервной копии',
+          hint: 'Выберите файл резервной копии .mpb или .json',
+        },
+        conflict: {
+          title: 'Перезаписать POI?',
+          message: 'POI "{name}" уже существует. Перезаписать POI?',
+          apply_for_all: 'Применить для всех остальных POI',
+          skip: 'Пропустить',
+          rewrite: 'Перезаписать',
+        },
+      },
       properties: {
         title: 'Свойства POI',
         color: 'Цвет',

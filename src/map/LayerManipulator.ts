@@ -17,6 +17,7 @@ class LayerManipulator implements maplibregl.IControl {
   private _extendStyleID: string = '';
   private _extendStyle: maplibregl.StyleSpecification | null = null;
   private _ignoreWatchChange: boolean = false;
+  private _stoppers: Array<() => void> = [];
 
   /**
    * IControl required method - called when control is added to map
@@ -31,7 +32,7 @@ class LayerManipulator implements maplibregl.IControl {
     });
     //Watch for changes in current base map and update map style accordingly
     const mapsList = useMapsList();
-    watch(mapsList.currentBaseMap, (newMapID: string) => {
+    const stopBaseMapWatch = watch(mapsList.currentBaseMap, (newMapID: string) => {
       //If basemap setted by class events, ignore new value to prevent recurcive loop
       if (this._ignoreWatchChange) {
         this._ignoreWatchChange = false;
@@ -42,7 +43,7 @@ class LayerManipulator implements maplibregl.IControl {
       });
     });
 
-    watch(
+    const stopLayersWatch = watch(
       () => mapsList.layers.value,
       (newLayers) => {
         //If layers setted by class events, ignore new value to prevent recurcive loop
@@ -55,6 +56,7 @@ class LayerManipulator implements maplibregl.IControl {
       },
       { deep: true, immediate: true },
     );
+    this._stoppers.push(stopBaseMapWatch, stopLayersWatch);
     // Create a container for the control (can be used for UI elements if needed)
     this._container = document.createElement('div');
     // Empty div for now, can add UI elements later if needed
@@ -65,6 +67,14 @@ class LayerManipulator implements maplibregl.IControl {
    * IControl required method - called when control is removed from map
    */
   onRemove(): void {
+    this._stoppers.forEach((stop) => {
+      try {
+        stop();
+      } catch (error) {
+        console.warn('Failed to stop layer manipulator watcher', error);
+      }
+    });
+    this._stoppers = [];
     if (this._container && this._container.parentNode) {
       this._container.parentNode.removeChild(this._container);
     }

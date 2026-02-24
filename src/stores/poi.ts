@@ -1,27 +1,64 @@
 import type { Feature, GeoJsonProperties, Geometry } from 'geojson';
 import { defineStore } from 'pinia';
+import { generateUUID, isUUID } from 'src/helpers/uuid';
 
 export interface POIFolderItem {
-  ID: number;
+  ID: string;
   name: string;
-  parentID: number | null;
+  parentID: string | null;
 }
 
 export type POIFeatureProperties = (GeoJsonProperties extends null
   ? Record<string, unknown>
   : NonNullable<GeoJsonProperties>) & {
   name?: string;
-  folderID?: number | null;
+  folderID?: string | null;
+  visible?: number;
 };
 
 export type POIFeature = Feature<Geometry, POIFeatureProperties>;
 
+function normalizeFolderID(value: unknown): string | null {
+  if (typeof value === 'string' && value.trim().length > 0) return value;
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  return null;
+}
+
+function normalizeFeatureID(value: unknown): string {
+  if (typeof value === 'string' && value.trim().length > 0) {
+    if (isUUID(value)) return value;
+    if (Number.isFinite(Number(value))) return generateUUID();
+    return value;
+  }
+  if (typeof value === 'number' && Number.isFinite(value)) return generateUUID();
+  return generateUUID();
+}
+
+function normalizeVisibility(value: unknown): number {
+  if (value === false) return 0;
+  if (value === true) return 1;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return 1;
+  return parsed === 0 ? 0 : 1;
+}
+
 function normalizeDrawingFeature(feature: Feature<Geometry, GeoJsonProperties>): POIFeature {
   const normalized = feature as POIFeature;
   const properties = normalized.properties ?? {};
+  normalized.id = normalizeFeatureID(normalized.id);
+
   if (!Object.prototype.hasOwnProperty.call(properties, 'folderID')) {
     properties.folderID = null;
+  } else {
+    properties.folderID = normalizeFolderID(properties.folderID);
   }
+
+  if (!Object.prototype.hasOwnProperty.call(properties, 'visible')) {
+    properties.visible = 1;
+  } else {
+    properties.visible = normalizeVisibility(properties.visible);
+  }
+
   normalized.properties = properties;
   return normalized;
 }
@@ -30,7 +67,6 @@ export const usePOIStore = defineStore('poi', {
   state: () => ({
     drawings: [] as Array<POIFeature>,
     folders: [] as Array<POIFolderItem>,
-    folderCounter: 0,
     counters: {
       polygon: 0,
       polyline: 0,
@@ -56,32 +92,35 @@ export const usePOIStore = defineStore('poi', {
       this.drawings.push(...features.map((feature) => normalizeDrawingFeature(feature)));
     },
     setFolders(folders: Array<POIFolderItem>) {
-      this.folders = folders;
-      const maxFolderID = folders.reduce((maxID, item) => Math.max(maxID, item.ID), 0);
-      this.folderCounter = Math.max(this.folderCounter, maxFolderID);
+      this.folders = folders.map((item) => ({
+        ...item,
+        ID: normalizeFeatureID(item.ID),
+        parentID: normalizeFolderID(item.parentID),
+      }));
+
+      this.ensureUUIDIDs();
     },
-    addFolder(name: string, parentID: number | null = null) {
-      this.folderCounter += 1;
+    addFolder(name: string, parentID: string | null = null) {
       const folder: POIFolderItem = {
-        ID: this.folderCounter,
+        ID: generateUUID(),
         name,
-        parentID,
+        parentID: normalizeFolderID(parentID),
       };
       this.folders.push(folder);
       return folder;
     },
-    renameFolder(folderID: number, name: string) {
+    renameFolder(folderID: string, name: string) {
       const folder = this.folders.find((item) => item.ID === folderID);
       if (!folder) return false;
       folder.name = name;
       return true;
     },
-    moveFolder(folderID: number, targetParentID: number | null) {
+    moveFolder(folderID: string, targetParentID: string | null) {
       const folder = this.folders.find((item) => item.ID === folderID);
       if (!folder) return false;
       if (targetParentID === folderID) return false;
 
-      if (typeof targetParentID === 'number') {
+      if (typeof targetParentID === 'string') {
         const targetFolder = this.folders.find((item) => item.ID === targetParentID);
         if (!targetFolder) return false;
 
@@ -92,7 +131,7 @@ export const usePOIStore = defineStore('poi', {
       folder.parentID = targetParentID;
       return true;
     },
-    deleteFolder(folderID: number) {
+    deleteFolder(folderID: string) {
       const folder = this.folders.find((item) => item.ID === folderID);
       if (!folder) return false;
 
@@ -109,8 +148,7 @@ export const usePOIStore = defineStore('poi', {
       });
 
       this.drawings = this.drawings.map((feature) => {
-        const featureFolderID =
-          typeof feature.properties?.folderID === 'number' ? feature.properties.folderID : null;
+        const featureFolderID = normalizeFolderID(feature.properties?.folderID);
         if (featureFolderID !== folderID) return feature;
 
         return {
@@ -125,13 +163,13 @@ export const usePOIStore = defineStore('poi', {
       this.folders = this.folders.filter((item) => item.ID !== folderID);
       return true;
     },
-    getFolderDescendantIDs(folderID: number) {
-      const descendants: Array<number> = [];
-      const queue: Array<number> = [folderID];
+    getFolderDescendantIDs(folderID: string) {
+      const descendants: Array<string> = [];
+      const queue: Array<string> = [folderID];
 
       while (queue.length > 0) {
         const current = queue.shift();
-        if (typeof current !== 'number') continue;
+        if (typeof current !== 'string') continue;
 
         const children = this.folders
           .filter((item) => item.parentID === current)
@@ -164,6 +202,54 @@ export const usePOIStore = defineStore('poi', {
     },
     clearDrawings() {
       this.drawings = [];
+    },
+    ensureUUIDIDs() {
+      const folderIDMap = new Map<string, string>();
+
+      this.folders = this.folders.map((folder) => {
+        const legacyID = String(folder.ID);
+        const nextID = normalizeFeatureID(folder.ID);
+        if (legacyID !== nextID) {
+          folderIDMap.set(legacyID, nextID);
+        }
+
+        return {
+          ...folder,
+          ID: nextID,
+          parentID: normalizeFolderID(folder.parentID),
+        };
+      });
+
+      this.folders = this.folders.map((folder) => {
+        const parentID = normalizeFolderID(folder.parentID);
+        if (parentID == null) {
+          return {
+            ...folder,
+            parentID: null,
+          };
+        }
+
+        return {
+          ...folder,
+          parentID: folderIDMap.get(parentID) ?? parentID,
+        };
+      });
+
+      this.drawings = this.drawings.map((item) => {
+        const normalized = normalizeDrawingFeature(item);
+        const rawFolderID = normalizeFolderID(normalized.properties?.folderID);
+
+        const nextFolderID =
+          rawFolderID == null ? null : (folderIDMap.get(rawFolderID) ?? rawFolderID);
+
+        return {
+          ...normalized,
+          properties: {
+            ...(normalized.properties ?? {}),
+            folderID: nextFolderID,
+          },
+        };
+      });
     },
     setStyle(value: {
       drawActiveColor: string;

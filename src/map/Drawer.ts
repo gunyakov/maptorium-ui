@@ -1,5 +1,6 @@
 import { t } from 'src/i18n';
 import { usePOIStore } from 'src/stores/poi';
+import { generateUUID } from 'src/helpers/uuid';
 import { useSettingsStore } from 'src/stores/settings';
 import { useDrawMeasure } from 'src/composables/useDrawMeasure';
 import EPSG3857 from 'src/helpers/EPSG3857';
@@ -335,7 +336,11 @@ class Drawer implements maplibregl.IControl {
     }
     this._setHoveredFeatureId(null);
     if (this._map && this._draw) {
-      this._map.removeControl(this._draw);
+      try {
+        this._map.removeControl(this._draw);
+      } catch (error) {
+        console.warn('MapboxDraw control removal failed', error);
+      }
     }
     if (this._contextMenu && this._contextMenu.parentNode) {
       this._contextMenu.parentNode.removeChild(this._contextMenu);
@@ -716,7 +721,7 @@ class Drawer implements maplibregl.IControl {
         normalized.properties = {
           ...(normalized.properties ?? {}),
           folderID:
-            typeof this._modifyOriginalFeature?.properties?.folderID === 'number'
+            typeof this._modifyOriginalFeature?.properties?.folderID === 'string'
               ? this._modifyOriginalFeature.properties.folderID
               : null,
         };
@@ -899,8 +904,7 @@ class Drawer implements maplibregl.IControl {
     const polygonPoints = this._extractPolygonPoints(featureId);
     if (!polygonPoints) return;
 
-    const polygonID = Number(featureId);
-    const normalizedPolygonID = Number.isFinite(polygonID) ? polygonID : 0;
+    const normalizedPolygonID = this._toNumericPoiID(featureId);
 
     const data = (await dialogs(ModalsList.Job, {
       polygonID: normalizedPolygonID,
@@ -917,8 +921,7 @@ class Drawer implements maplibregl.IControl {
     const polygonPoints = this._extractPolygonPoints(featureId);
     if (!polygonPoints) return;
 
-    const polygonID = Number(featureId);
-    const normalizedPolygonID = Number.isFinite(polygonID) ? polygonID : 0;
+    const normalizedPolygonID = this._toNumericPoiID(featureId);
 
     const data = (await dialogs(ModalsList.CachedMap, {
       polygonID: normalizedPolygonID,
@@ -1613,11 +1616,28 @@ class Drawer implements maplibregl.IControl {
   }
 
   private _createFeatureId(existingIds: Set<DrawFeatureId>) {
-    let nextId = Date.now();
+    let nextId = generateUUID();
     while (existingIds.has(nextId)) {
-      nextId += 1;
+      nextId = generateUUID();
     }
     return nextId;
+  }
+
+  private _toNumericPoiID(featureId: DrawFeatureId) {
+    if (typeof featureId === 'number' && Number.isFinite(featureId)) return featureId;
+    if (typeof featureId === 'string') {
+      const parsed = Number(featureId);
+      if (Number.isFinite(parsed)) return parsed;
+
+      let hash = 0;
+      for (let index = 0; index < featureId.length; index += 1) {
+        hash = (hash * 31 + featureId.charCodeAt(index)) >>> 0;
+      }
+
+      return hash;
+    }
+
+    return 0;
   }
 
   private _refreshPOILayerData() {
@@ -1632,19 +1652,21 @@ class Drawer implements maplibregl.IControl {
 
     source.setData({
       type: 'FeatureCollection',
-      features: poiStore.drawings.map((feature) => {
-        const featureCopy = JSON.parse(JSON.stringify(feature)) as Feature<
-          Geometry,
-          GeoJsonProperties
-        >;
-        const sourceId = featureCopy.id;
-        const properties = (featureCopy.properties ?? {}) as GeoJsonProperties;
-        featureCopy.properties = {
-          ...properties,
-          [POI_HOVER_ID_PROPERTY]: sourceId,
-        };
-        return featureCopy;
-      }),
+      features: poiStore.drawings
+        .filter((feature) => Number(feature.properties?.visible ?? 1) !== 0)
+        .map((feature) => {
+          const featureCopy = JSON.parse(JSON.stringify(feature)) as Feature<
+            Geometry,
+            GeoJsonProperties
+          >;
+          const sourceId = featureCopy.id;
+          const properties = (featureCopy.properties ?? {}) as GeoJsonProperties;
+          featureCopy.properties = {
+            ...properties,
+            [POI_HOVER_ID_PROPERTY]: sourceId,
+          };
+          return featureCopy;
+        }),
     });
     this._setHoveredFeatureId(this._hoveredFeatureId);
   }

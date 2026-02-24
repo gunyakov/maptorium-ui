@@ -15,6 +15,9 @@ export default defineBoot(({ app } /* { app, router, ... } */) => {
   app.use(pinia);
 
   const settings = useSettingsStore();
+  // Ensure side panels are closed on startup (override any older persisted values)
+  settings.jobManager = false;
+  settings.poiManager = false;
   if (settings.locale) {
     const i18n = getI18nInstance();
     if (typeof i18n.global.locale === 'string') {

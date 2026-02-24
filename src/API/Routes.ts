@@ -63,9 +63,15 @@ class MAPTORIUMROUTES {
    * @param ID - Route ID from RouteList, default is 0 - current route
    */
   public async Points(routeID: number = 0): Promise<Array<GPSCoords> | false> {
-    const historyStore = useRouteHistoryStore();
+    let historyStore: ReturnType<typeof useRouteHistoryStore> | null = null;
+    try {
+      historyStore = useRouteHistoryStore();
+    } catch {
+      // Pinia is not active yet — avoid throwing and skip store-related actions
+      historyStore = null;
+    }
 
-    if (routeID > 0 && historyStore.isVisible(routeID)) {
+    if (routeID > 0 && historyStore && historyStore.isVisible(routeID)) {
       historyStore.removeRoute(routeID);
       return false;
     }
@@ -76,7 +82,7 @@ class MAPTORIUMROUTES {
       | false;
 
     if (routePoints) {
-      if (routeID > 0) {
+      if (routeID > 0 && historyStore) {
         historyStore.setRoute(routeID, routePoints);
       }
       if (this.onMap.value) this._fire(RoutesEvents.route, routeID, routePoints);
@@ -149,5 +155,12 @@ import socket from 'src/API/Socket';
 //SOCKET.IO new Route point event
 //----------------------------------------------------------------------------------------------------------------------
 socket.on('gps.routepoint', (data: { lat: number; lng: number }) => {
-  Routes.Point(data.lat, data.lng);
+  try {
+    Routes.Point(data.lat, data.lng);
+  } catch (e) {
+    // If Pinia isn't ready yet, don't let the event crash the app — log and ignore
+    // This can happen if socket events arrive before app boot/Pinia initialization
+    // The next event or a user action will retry route handling.
+    console.warn('gps.routepoint ignored: Pinia not active yet', (e as Error)?.message ?? e);
+  }
 });

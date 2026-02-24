@@ -45,7 +45,9 @@
     <q-tree
       :nodes="nodes"
       node-key="id"
+      tick-strategy="leaf"
       v-model:selected="selected"
+      v-model:ticked="ticked"
       v-model:expanded="expanded"
     >
       <template #default-header="scope">
@@ -77,7 +79,7 @@ interface POITreeNode {
   id: string;
   label: string;
   nodeType: 'folder' | 'poi';
-  folderID?: number | null;
+  folderID?: string | null;
   geometryType?: GeometryType;
   featureID?: string | number;
   children?: Array<POITreeNode>;
@@ -91,18 +93,20 @@ const dialogs = useDialogs();
 const prompt = usePrompt();
 const expanded = ref<Array<string>>([ROOT_NODE_ID]);
 const selected = ref<string | null>(ROOT_NODE_ID);
+const ticked = ref<Array<string>>([]);
+const syncingTickedFromStore = ref(false);
 
-const selectedFolderID = computed<number | null>(() => {
+const selectedFolderID = computed<string | null>(() => {
   if (!selected.value) return null;
   if (selected.value === ROOT_NODE_ID) return null;
   if (!selected.value.startsWith('folder:')) return null;
 
-  const folderID = Number(selected.value.replace('folder:', ''));
-  return Number.isFinite(folderID) ? folderID : null;
+  const folderID = selected.value.replace('folder:', '').trim();
+  return folderID.length > 0 ? folderID : null;
 });
 
 const selectedFolder = computed(() => {
-  if (typeof selectedFolderID.value !== 'number') return null;
+  if (typeof selectedFolderID.value !== 'string') return null;
   return poiStore.folders.find((item) => item.ID === selectedFolderID.value) ?? null;
 });
 
@@ -130,12 +134,12 @@ const nodes = computed<Array<POITreeNode>>(() => {
       label: 'POI',
       nodeType: 'folder',
       folderID: null,
-      children: getChildrenByFolderID(null, new Set<number>()),
+      children: getChildrenByFolderID(null, new Set<string>()),
     },
   ];
 });
 
-function toFolderNode(folder: POIFolderItem, visited: Set<number>): POITreeNode {
+function toFolderNode(folder: POIFolderItem, visited: Set<string>): POITreeNode {
   const nextVisited = new Set(visited);
   nextVisited.add(folder.ID);
 
@@ -163,7 +167,11 @@ function toPOINode(feature: POIFeature, index: number): POITreeNode {
   };
 }
 
-function getChildrenByFolderID(folderID: number | null, visited: Set<number>): Array<POITreeNode> {
+function isPOIVisible(feature: POIFeature): boolean {
+  return Number(feature.properties?.visible ?? 1) !== 0;
+}
+
+function getChildrenByFolderID(folderID: string | null, visited: Set<string>): Array<POITreeNode> {
   const childFolders = poiStore.folders
     .filter((folder) => folder.parentID === folderID && !visited.has(folder.ID))
     .map((folder) => toFolderNode(folder, visited));
@@ -171,7 +179,7 @@ function getChildrenByFolderID(folderID: number | null, visited: Set<number>): A
   const childPOI = poiStore.drawings
     .filter((feature) => {
       const featureFolderID =
-        typeof feature.properties?.folderID === 'number' ? feature.properties.folderID : null;
+        typeof feature.properties?.folderID === 'string' ? feature.properties.folderID : null;
       return featureFolderID === folderID;
     })
     .map((feature, index) => toPOINode(feature, index));
@@ -193,12 +201,12 @@ function isSelectedFolderStillValid() {
   if (!selected.value || selected.value === ROOT_NODE_ID) return true;
   if (!selected.value.startsWith('folder:')) return true;
 
-  const selectedID = Number(selected.value.replace('folder:', ''));
-  if (!Number.isFinite(selectedID)) return false;
+  const selectedID = selected.value.replace('folder:', '').trim();
+  if (!selectedID) return false;
   return poiStore.folders.some((item) => item.ID === selectedID);
 }
 
-function ensureFolderExpanded(folderID: number | null) {
+function ensureFolderExpanded(folderID: string | null) {
   const targetNodeID = folderID == null ? ROOT_NODE_ID : `folder:${folderID}`;
   if (!expanded.value.includes(targetNodeID)) {
     expanded.value = [...expanded.value, targetNodeID];
@@ -279,7 +287,7 @@ async function moveSelectedItem() {
     },
     ...poiStore.folders.map((item) => ({
       label: item.name,
-      value: String(item.ID),
+      value: item.ID,
     })),
   ];
 
@@ -287,16 +295,12 @@ async function moveSelectedItem() {
     const descendants = poiStore.getFolderDescendantIDs(selectedFolder.value.ID);
     const options = allFolderOptions.filter((item) => {
       if (item.value === 'root') return true;
-      const optionFolderID = Number(item.value);
-      if (!Number.isFinite(optionFolderID)) return false;
+      const optionFolderID = item.value;
       if (optionFolderID === selectedFolder.value?.ID) return false;
       return !descendants.includes(optionFolderID);
     });
 
-    const model =
-      typeof selectedFolder.value.parentID === 'number'
-        ? String(selectedFolder.value.parentID)
-        : 'root';
+    const model = selectedFolder.value.parentID ?? 'root';
 
     const value = (await dialogs(ModalsList.POIMove, {
       options,
@@ -304,15 +308,14 @@ async function moveSelectedItem() {
     })) as string | false;
 
     if (!value) return;
-    const targetParentID = value === 'root' ? null : Number(value);
-    if (value !== 'root' && !Number.isFinite(targetParentID)) return;
+    const targetParentID = value === 'root' ? null : value;
     poiStore.moveFolder(selectedFolder.value.ID, targetParentID);
     ensureFolderExpanded(targetParentID);
     return;
   }
 
   const currentPOIFolderID =
-    typeof selectedPOI.value?.properties?.folderID === 'number'
+    typeof selectedPOI.value?.properties?.folderID === 'string'
       ? selectedPOI.value.properties.folderID
       : null;
 
@@ -322,8 +325,7 @@ async function moveSelectedItem() {
   })) as string | false;
 
   if (!value) return;
-  const targetParentID = value === 'root' ? null : Number(value);
-  if (value !== 'root' && !Number.isFinite(targetParentID)) return;
+  const targetParentID = value === 'root' ? null : value;
   if (!selectedPOI.value) return;
 
   poiStore.setDrawings(
@@ -357,7 +359,7 @@ async function deleteSelectedItem() {
 
     const deleteID = selectedFolder.value?.ID;
     const parentID = selectedFolder.value?.parentID ?? null;
-    if (typeof deleteID !== 'number') return;
+    if (typeof deleteID !== 'string') return;
 
     poiStore.deleteFolder(deleteID);
     selected.value = parentID == null ? ROOT_NODE_ID : `folder:${parentID}`;
@@ -384,13 +386,13 @@ async function deleteSelectedItem() {
   if (!confirmed) return;
 
   const poiID = selectedPOI.value?.id;
-  const parentID =
-    typeof selectedPOI.value?.properties?.folderID === 'number'
+  const parentID: string | null =
+    typeof selectedPOI.value?.properties?.folderID === 'string'
       ? selectedPOI.value.properties.folderID
       : null;
 
   poiStore.setDrawings(poiStore.drawings.filter((item) => String(item.id) !== String(poiID)));
-  selected.value = parentID == null ? ROOT_NODE_ID : `folder:${parentID}`;
+  selected.value = parentID == null ? ROOT_NODE_ID : `folder:${String(parentID)}`;
   ensureFolderExpanded(parentID);
 }
 
@@ -453,6 +455,16 @@ function flyToFeature(node: POITreeNode) {
   });
 }
 
+function syncTickedFromStore() {
+  const nextTicked = poiStore.drawings
+    .filter((feature) => isPOIVisible(feature))
+    .map((feature) => `poi:${String(feature.id)}`);
+
+  syncingTickedFromStore.value = true;
+  ticked.value = nextTicked;
+  syncingTickedFromStore.value = false;
+}
+
 watch(
   () => poiStore.folders.map((item) => item.ID).join('|'),
   () => {
@@ -463,10 +475,47 @@ watch(
 );
 
 watch(
+  () => poiStore.drawings.map((item) => `${String(item.id)}:${Number(item.properties?.visible ?? 1)}`).join('|'),
+  () => {
+    syncTickedFromStore();
+  },
+  { immediate: true },
+);
+
+watch(
+  () => [...ticked.value],
+  (nextTicked) => {
+    if (syncingTickedFromStore.value) return;
+
+    const tickedPOI = new Set(nextTicked.filter((item) => item.startsWith('poi:')));
+    const nextDrawings = poiStore.drawings.map((item) => {
+      const poiNodeID = `poi:${String(item.id)}`;
+      const nextVisible = tickedPOI.has(poiNodeID) ? 1 : 0;
+      const currentVisible = Number(item.properties?.visible ?? 1) === 0 ? 0 : 1;
+
+      if (nextVisible === currentVisible) return item;
+
+      return {
+        ...item,
+        properties: {
+          ...(item.properties ?? {}),
+          visible: nextVisible,
+        },
+      };
+    });
+
+    const changed = nextDrawings.some((item, index) => item !== poiStore.drawings[index]);
+    if (!changed) return;
+
+    poiStore.setDrawings(nextDrawings);
+  },
+);
+
+watch(
   () => selected.value,
   () => {
-  if (!isSelectedFolderStillValid()) {
-    selected.value = ROOT_NODE_ID;
+    if (!isSelectedFolderStillValid()) {
+      selected.value = ROOT_NODE_ID;
       return;
     }
 
