@@ -1,5 +1,7 @@
 # Maptorium UI
 
+![Maptorium](./main.png)
+
 Maptorium UI is now a Quasar-powered interface that ships ready for Electron. This repository builds only the desktop UI package; it does not build or bundle the Node.js server. If you need the full server + UI distribution visit https://github.com/gunyakov/maptorium-server.
 
 ## Highlights
